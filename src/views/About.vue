@@ -1,104 +1,188 @@
 <template>
-  <div class="min-h-screen py-12">
+  <div class="min-h-screen blockchain-pattern py-12">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="text-center mb-12">
-        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-          Sobre o Projeto
+        <h1
+          class="text-4xl md:text-5xl font-bold text-mist-white mb-6 glow-text"
+        >
+          About Stellar Myth
         </h1>
-        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-          Conheça mais sobre o desenvolvimento e as tecnologias por trás do Stellar Myth.
+        <p class="text-xl text-mid-gray max-w-2xl mx-auto">
+          Discover the revolutionary fusion of blockchain technology and
+          immersive gaming experiences.
         </p>
       </div>
 
       <!-- Content -->
-      <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+      <div class="gaming-card neon-glow">
         <div class="p-8 md:p-12">
           <!-- Project Description -->
           <div class="mb-8">
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">O Que é o Stellar Myth?</h2>
-            <p class="text-gray-600 leading-relaxed mb-4">
-              O Stellar Myth é um projeto de demonstração que combina as melhores práticas
-              de desenvolvimento front-end moderno. Utilizando Vue 3 como framework principal,
-              Vue Router para navegação e Tailwind CSS para estilização, este projeto serve
-              como base para aplicações web robustas e escaláveis.
+            <h2 class="text-2xl font-bold text-mist-white mb-4">
+              What is Stellar Myth?
+            </h2>
+            <p class="text-mid-gray leading-relaxed mb-4">
+              Stellar Myth represents the next generation of blockchain-powered
+              gaming platforms. By combining cutting-edge Web3 technologies with
+              immersive gameplay mechanics, we're creating a universe where
+              players truly own their digital assets and experiences.
             </p>
-            <p class="text-gray-600 leading-relaxed">
-              O objetivo é fornecer uma estrutura sólida e bem organizada que pode ser
-              facilmente adaptada para diferentes tipos de projetos, desde landing pages
-              até aplicações complexas de single-page.
+            <p class="text-mid-gray leading-relaxed">
+              Our platform leverages the power of decentralized finance (DeFi)
+              and non-fungible tokens (NFTs) to create a player-driven economy
+              where every action has real value and lasting impact.
             </p>
           </div>
 
-          <!-- Technical Stack -->
+          <!-- Technology Stack -->
           <div class="mb-8">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">Stack Técnico</h2>
-            <div class="space-y-4">
-              <div class="flex items-start space-x-4">
-                <div class="w-2 h-2 bg-stellar-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <h3 class="font-semibold text-gray-900">Vue 3 (Composition API)</h3>
-                  <p class="text-gray-600 text-sm">Framework progressivo com melhor performance e TypeScript support</p>
-                </div>
+            <h2 class="text-2xl font-bold text-mist-white mb-6">
+              Technology Stack
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div
+                class="bg-twilight-blue/50 p-4 rounded-lg border border-mystic-cyan/30"
+              >
+                <h3 class="font-semibold text-mystic-cyan mb-2">Frontend</h3>
+                <ul class="text-mid-gray text-sm space-y-1">
+                  <li>• Vue 3 Composition API</li>
+                  <li>• Vue Router 4</li>
+                  <li>• Tailwind CSS 3</li>
+                  <li>• WebGL & Three.js</li>
+                </ul>
               </div>
-              <div class="flex items-start space-x-4">
-                <div class="w-2 h-2 bg-stellar-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <h3 class="font-semibold text-gray-900">Vue Router 4</h3>
-                  <p class="text-gray-600 text-sm">Roteamento oficial com suporte a lazy loading e guards</p>
-                </div>
-              </div>
-              <div class="flex items-start space-x-4">
-                <div class="w-2 h-2 bg-stellar-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <h3 class="font-semibold text-gray-900">Tailwind CSS 3</h3>
-                  <p class="text-gray-600 text-sm">Framework CSS utility-first com design system customizável</p>
-                </div>
-              </div>
-              <div class="flex items-start space-x-4">
-                <div class="w-2 h-2 bg-stellar-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <h3 class="font-semibold text-gray-900">Vite</h3>
-                  <p class="text-gray-600 text-sm">Build tool moderna com Hot Module Replacement ultrarrápido</p>
-                </div>
+              <div
+                class="bg-twilight-blue/50 p-4 rounded-lg border border-mystic-cyan/30"
+              >
+                <h3 class="font-semibold text-mystic-cyan mb-2">Blockchain</h3>
+                <ul class="text-mid-gray text-sm space-y-1">
+                  <li>• Ethereum Network</li>
+                  <li>• Smart Contracts</li>
+                  <li>• Web3 Integration</li>
+                  <li>• IPFS Storage</li>
+                </ul>
               </div>
             </div>
           </div>
 
           <!-- Features -->
           <div class="mb-8">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">Características</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="bg-gray-50 p-6 rounded-lg">
-                <h3 class="font-semibold text-gray-900 mb-2">📱 Responsivo</h3>
-                <p class="text-gray-600 text-sm">Design que se adapta perfeitamente a todos os tamanhos de tela</p>
+            <h2 class="text-2xl font-bold text-mist-white mb-6">
+              Core Features
+            </h2>
+            <div class="space-y-4">
+              <div class="flex items-start space-x-3">
+                <div
+                  class="w-6 h-6 bg-mystic-cyan/20 rounded-full flex-shrink-0 mt-0.5"
+                >
+                  <div
+                    class="w-2 h-2 bg-mystic-cyan rounded-full mx-auto mt-2"
+                  ></div>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-mist-white">
+                    NFT Asset Ownership
+                  </h4>
+                  <p class="text-mid-gray text-sm">
+                    True ownership of in-game items, characters, and land
+                    through blockchain-verified NFTs.
+                  </p>
+                </div>
               </div>
-              <div class="bg-gray-50 p-6 rounded-lg">
-                <h3 class="font-semibold text-gray-900 mb-2">⚡ Performance</h3>
-                <p class="text-gray-600 text-sm">Otimizado para carregamento rápido e experiência fluida</p>
+
+              <div class="flex items-start space-x-3">
+                <div
+                  class="w-6 h-6 bg-lamp-yellow/20 rounded-full flex-shrink-0 mt-0.5"
+                >
+                  <div
+                    class="w-2 h-2 bg-lamp-yellow rounded-full mx-auto mt-2"
+                  ></div>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-mist-white">
+                    Play-to-Earn Economy
+                  </h4>
+                  <p class="text-mid-gray text-sm">
+                    Earn cryptocurrency rewards through gameplay, tournaments,
+                    and community participation.
+                  </p>
+                </div>
               </div>
-              <div class="bg-gray-50 p-6 rounded-lg">
-                <h3 class="font-semibold text-gray-900 mb-2">🎨 Design System</h3>
-                <p class="text-gray-600 text-sm">Paleta de cores personalizada e componentes reutilizáveis</p>
-              </div>
-              <div class="bg-gray-50 p-6 rounded-lg">
-                <h3 class="font-semibold text-gray-900 mb-2">🔧 Configurável</h3>
-                <p class="text-gray-600 text-sm">Estrutura flexível e fácil de personalizar</p>
+
+              <div class="flex items-start space-x-3">
+                <div
+                  class="w-6 h-6 bg-night-forest/40 rounded-full flex-shrink-0 mt-0.5"
+                >
+                  <div
+                    class="w-2 h-2 bg-night-forest rounded-full mx-auto mt-2"
+                  ></div>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-mist-white">
+                    Decentralized Governance
+                  </h4>
+                  <p class="text-mid-gray text-sm">
+                    Community-driven decision making through DAO voting
+                    mechanisms.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Action Buttons -->
-          <div class="flex flex-col sm:flex-row gap-4 justify-center pt-8 border-t border-gray-200">
-            <router-link to="/" class="btn-primary inline-flex items-center justify-center">
-              <svg class="mr-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          <!-- Stats -->
+          <div class="mb-8">
+            <h2 class="text-2xl font-bold text-mist-white mb-6">
+              Platform Statistics
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div class="text-center p-4 bg-slate-concrete/50 rounded-lg">
+                <div class="text-2xl font-bold text-mystic-cyan">1M+</div>
+                <div class="text-xs text-mid-gray">Users</div>
+              </div>
+              <div class="text-center p-4 bg-slate-concrete/50 rounded-lg">
+                <div class="text-2xl font-bold text-lamp-yellow">$50M</div>
+                <div class="text-xs text-mid-gray">Volume</div>
+              </div>
+              <div class="text-center p-4 bg-slate-concrete/50 rounded-lg">
+                <div class="text-2xl font-bold text-mystic-cyan">10K</div>
+                <div class="text-xs text-mid-gray">NFTs</div>
+              </div>
+              <div class="text-center p-4 bg-slate-concrete/50 rounded-lg">
+                <div class="text-2xl font-bold text-lamp-yellow">99.9%</div>
+                <div class="text-xs text-mid-gray">Uptime</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Call to Action -->
+          <div class="text-center">
+            <router-link
+              to="/"
+              class="btn-primary inline-flex items-center justify-center mr-4"
+            >
+              Return Home
+              <svg
+                class="ml-2 w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                ></path>
               </svg>
-              Voltar ao Início
             </router-link>
-            <button class="btn-secondary">
-              Ver no GitHub
-            </button>
+            <a
+              href="#"
+              class="text-night-forest hover:text-mystic-cyan transition-colors"
+            >
+              Join Community →
+            </a>
           </div>
         </div>
       </div>
@@ -108,6 +192,6 @@
 
 <script>
 export default {
-  name: 'About'
-}
+  name: "About",
+};
 </script>

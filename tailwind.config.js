@@ -4,18 +4,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        stellar: {
-          50: "#f0f9ff",
-          100: "#e0f2fe",
-          200: "#bae6fd",
-          300: "#7dd3fc",
-          400: "#38bdf8",
-          500: "#0ea5e9",
-          600: "#0284c7",
-          700: "#0369a1",
-          800: "#075985",
-          900: "#0c4a6e",
-        },
+        // Gaming & Blockchain Theme Colors with Brazilian Dark Inspiration
+        "dark-night": "#0D1117", // Fundo principal escuro
+        "slate-concrete": "#1A1E23", // Chumbo-Calçada mais escuro
+        "twilight-blue": "#1C2541", // Azul-Crepúsculo (cards)
+        "brazil-green": "#009739", // Verde Brasil
+        "brazil-yellow": "#FFCD00", // Amarelo Brasil
+        "mist-white": "#E1E1E1", // Branco-Névoa (títulos)
+        "mid-gray": "#8D99AE", // Cinza-Intermediário (texto)
+        "lamp-yellow": "#F2B705", // Amarelo-Lampião (botões)
+        "night-forest": "#0B5351", // Verde-Mata Noturna (links)
+        "mystic-cyan": "#40E0D0", // Ciano-Místico (notificações)
+        "deep-blue": "#003366", // Azul escuro brasileiro
       },
     },
   },
