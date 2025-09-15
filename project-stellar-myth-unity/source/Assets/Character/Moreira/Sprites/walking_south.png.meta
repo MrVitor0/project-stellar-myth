@@ -322,7 +322,15 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      walking_south_0: -5340667304552955053
+      walking_south_1: -5325783505987067748
+      walking_south_2: -8618764742458768345
+      walking_south_3: 8479842199505265693
+      walking_south_4: -190262148930973324
+      walking_south_5: 1856125472023589421
+      walking_south_6: 8905706843034630853
+      walking_south_7: -7413731996835302757
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
