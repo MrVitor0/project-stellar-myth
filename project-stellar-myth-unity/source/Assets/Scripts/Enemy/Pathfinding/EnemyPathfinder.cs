@@ -50,6 +50,10 @@ namespace EnemySystem.Pathfinding
         private float stuckCheckTimer;
         private int stuckCounter;
         
+        // Sistema de cooldown após ser ferido
+        private bool wasHurt = false;
+        private float hurtRecoveryTimer = 0f;
+        
         // Sistema de animação (similar ao PlayerController2D)
         private EnemyDirection currentDirection = EnemyDirection.Down;
         private EnemyDirection lastDirection = EnemyDirection.Down;
@@ -140,6 +144,9 @@ namespace EnemySystem.Pathfinding
 
             // Atualiza detecção de travamento
             UpdateStuckDetection();
+            
+            // Atualiza sistema de cooldown após ser ferido
+            UpdateHurtRecovery();
 
             // Verifica se pode atacar (independente do estado)
             CheckAndPerformAttack();
@@ -202,6 +209,36 @@ namespace EnemySystem.Pathfinding
             currentState = PathfindingState.MovingToTarget;
         }
 
+        /// <summary>
+        /// Atualiza o sistema de cooldown de recuperação após ser ferido
+        /// </summary>
+        private void UpdateHurtRecovery()
+        {
+            if (combatController == null) return;
+
+            // Detecta quando o inimigo foi ferido
+            if (combatController.IsHurt && !wasHurt)
+            {
+                wasHurt = true;
+                hurtRecoveryTimer = config.hurtRecoveryCooldown;
+            }
+            
+            // Quando não está mais ferido, inicia o cooldown
+            else if (!combatController.IsHurt && wasHurt)
+            {
+                // Continua decrementando o timer até acabar
+                if (hurtRecoveryTimer > 0f)
+                {
+                    hurtRecoveryTimer -= Time.fixedDeltaTime;
+                }
+                else
+                {
+                    // Cooldown terminou, pode atacar novamente
+                    wasHurt = false;
+                }
+            }
+        }
+
         #endregion
 
         #region Attack System (Simplified)
@@ -232,10 +269,28 @@ namespace EnemySystem.Pathfinding
         {
             if (!IsInAttackRange()) return;
 
+            Debug.Log($"[ISHURT] {combatController.IsHurt} está em alcance de ataque.");
+            
+            // Verifica se o inimigo está tomando dano (não pode atacar enquanto sendo ferido)
+            if (combatController != null && combatController.IsHurt)
+            {
+                return; // Não ataca se estiver tomando dano
+            }
+            
+            // Verifica se ainda está no cooldown de recuperação após ser ferido
+            if (wasHurt && hurtRecoveryTimer > 0f)
+            {
+                return; // Ainda em cooldown de recuperação
+            }
+
             // Usa o novo sistema de combate se disponível
             if (combatController != null)
             {
-                combatController.ExecuteAttack();
+                // Verifica se pode atacar considerando o attack speed (cooldown)
+                if (combatController.CanAttack)
+                {
+                    combatController.ExecuteAttack();
+                }
             }
             else
             {

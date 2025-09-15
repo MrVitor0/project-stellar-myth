@@ -22,6 +22,8 @@ namespace EnemySystem.Pathfinding
         public EnemyCombatType combatType = EnemyCombatType.Melee;
         public float attackRange = 2f;
         public float attackCooldown = 1f;
+        [Tooltip("Tempo de cooldown após ser ferido antes de poder atacar novamente")]
+        public float hurtRecoveryCooldown = 1.5f;
         
         [Header("Avoidance Settings")]
         public float avoidanceRadius = 1f;

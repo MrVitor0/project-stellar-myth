@@ -18,6 +18,11 @@ namespace CombatSystem
         private Enemy enemy;
         private bool isHurt = false;
         
+        /// <summary>
+        /// Indica se o inimigo está atualmente tomando dano
+        /// </summary>
+        public bool IsHurt => isHurt;
+        
         protected override void Awake()
         {
             base.Awake();
