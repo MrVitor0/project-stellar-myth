@@ -15,9 +15,9 @@ GameObject:
   - component: {fileID: 2483870696589112669}
   - component: {fileID: 2586409884723336357}
   - component: {fileID: 7249446458247658892}
-  - component: {fileID: 6016094356979182512}
+  - component: {fileID: -8448044102218655974}
   m_Layer: 0
-  m_Name: New Character (Enemy)
+  m_Name: BaseEnemy (Enemy)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -105,7 +105,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 275b5b6c69681449ea82222418f9c4ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 100
   destroyOnDeath: 1
 --- !u!114 &2109412518415625049
 MonoBehaviour:
@@ -237,7 +236,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &6016094356979182512
+--- !u!114 &-8448044102218655974
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

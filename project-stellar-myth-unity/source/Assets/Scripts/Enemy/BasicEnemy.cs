@@ -92,7 +92,7 @@ namespace EnemySystem
 
         #region Overrides
 
-        protected override void OnDamageTaken(float damage)
+        public override void OnDamageTaken(float damage)
         {
             base.OnDamageTaken(damage);
             

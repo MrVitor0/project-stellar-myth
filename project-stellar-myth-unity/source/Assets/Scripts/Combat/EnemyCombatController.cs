@@ -31,11 +31,15 @@ namespace CombatSystem
         {
             base.Start();
             
-            // Sincroniza com o sistema antigo do Enemy se existir
+            // Conecta eventos do CombatController com callbacks do Enemy
             if (enemy != null)
             {
-                // Copia valores do sistema antigo para o novo sistema
-                // Se necessário, pode ajustar os valores aqui
+                // CombatController notifica Enemy sobre morte (única fonte de verdade)
+                attributes.OnDeath += () => enemy.Die();
+            }
+            else
+            {
+                Debug.LogWarning($"EnemyCombatController em '{gameObject.name}' não encontrou componente Enemy!");
             }
         }
         
@@ -54,21 +58,15 @@ namespace CombatSystem
         {
             // Para de processar se já está morto, desabilitado, ou machucado
             if (!enabled || !attributes.IsAlive() || isHurt) return;
-            
+
+            // CombatController processa o dano (única fonte de verdade)
             base.TakeDamage(damage, attackDirection);
             
             if (attributes.IsAlive())
             {
                 PlayHurtAnimation();
             }
-            
-            // Também aplica dano no sistema antigo para compatibilidade
-            if (enemy != null && attributes.IsAlive())
-            {
-                // Sincroniza com o sistema antigo
-                enemy.TakeDamage(damage);
-            }
-            
+          
             if (debugEnemyCombat)
             {
                 Debug.Log($"{gameObject.name} levou {damage} de dano. Vida restante: {attributes.CurrentHealth}");

@@ -88,7 +88,7 @@ namespace CombatSystem
             
             foreach (Collider2D enemyCollider in hitEnemies)
             {
-                // Tenta pegar o componente de combate do inimigo
+                // CombatController é OBRIGATÓRIO - única fonte de verdade
                 ICombatController enemyCombat = enemyCollider.GetComponent<ICombatController>();
                 if (enemyCombat != null)
                 {
@@ -102,17 +102,7 @@ namespace CombatSystem
                 }
                 else
                 {
-                    // Fallback para inimigos que ainda usam o sistema antigo
-                    var enemy = enemyCollider.GetComponent<EnemySystem.Enemy>();
-                    if (enemy != null)
-                    {
-                        enemy.TakeDamage(attributes.AttackPower);
-                        
-                        if (debugAttackDetection)
-                        {
-                            Debug.Log($"Dano aplicado (sistema antigo) a {enemyCollider.name}: {attributes.AttackPower}");
-                        }
-                    }
+                    Debug.LogWarning($"Inimigo {enemyCollider.name} não tem CombatController! Sistema legado removido.");
                 }
             }
         }

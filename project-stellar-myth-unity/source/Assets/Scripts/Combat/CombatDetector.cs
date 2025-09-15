@@ -52,18 +52,7 @@ namespace CombatSystem
                 }
                 else
                 {
-                    // Fallback para sistemas antigos
-                    var enemy = target.GetComponent<EnemySystem.Enemy>();
-                    if (enemy != null)
-                    {
-                        enemy.TakeDamage(damage);
-                        hitCount++;
-                        
-                        if (debugDetection)
-                        {
-                            Debug.Log($"{gameObject.name} atingiu {target.name} (sistema antigo) causando {damage} de dano");
-                        }
-                    }
+                    Debug.LogWarning($"Alvo {target.name} não tem CombatController! Sistema legado removido.");
                 }
             }
             

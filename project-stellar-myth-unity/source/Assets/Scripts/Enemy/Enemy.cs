@@ -1,27 +1,31 @@
 using UnityEngine;
+using CombatSystem;
 
 namespace EnemySystem
 {
     /// <summary>
-    /// Classe base para inimigos
-    /// Seguindo o Single Responsibility Principle (SRP)
-    /// Esta classe é responsável apenas por gerenciar o estado básico do inimigo
+    /// Classe de interface para inimigos - PROXY para CombatController
+    /// Responsabilidades:
+    /// - Interface com EnemySpawner
+    /// - Proxy para CombatController (única fonte de verdade)
+    /// - Compatibilidade com sistemas legados
     /// </summary>
     public class Enemy : MonoBehaviour
     {
         [Header("Enemy Settings")]
-        [SerializeField] private float health = 100f;
         [SerializeField] private bool destroyOnDeath = true;
 
         private EnemySpawner spawner;
-        private float currentHealth;
-        private bool isDead = false;
+        
+        // CombatController é a ÚNICA fonte de verdade
+        private ICombatController combatController;
 
         #region Properties
 
-        public float Health => currentHealth;
-        public float MaxHealth => health;
-        public bool IsDead => isDead;
+        // CombatController é a ÚNICA fonte de verdade - Enemy é apenas um proxy
+        public float Health => combatController?.Attributes?.CurrentHealth ?? 0f;
+        public float MaxHealth => combatController?.Attributes?.MaxHealth ?? 0f;
+        public bool IsDead => combatController?.Attributes?.IsAlive() == false;
 
         #endregion
 
@@ -29,7 +33,14 @@ namespace EnemySystem
 
         private void Awake()
         {
-            currentHealth = health;
+            // CombatController é OBRIGATÓRIO - é a única fonte de verdade
+            combatController = GetComponent<ICombatController>();
+            
+            if (combatController == null)
+            {
+                Debug.LogError($"Enemy '{gameObject.name}' PRECISA de um ICombatController (EnemyCombatController)! " +
+                              "O sistema legado não é mais suportado.");
+            }
         }
 
         #endregion
@@ -45,34 +56,29 @@ namespace EnemySystem
         }
 
         /// <summary>
-        /// Aplica dano ao inimigo
+        /// PROXY: Delega dano para CombatController (única fonte de verdade)
         /// </summary>
         public virtual void TakeDamage(float damage)
         {
-            if (isDead) return;
-
-            currentHealth -= damage;
-            currentHealth = Mathf.Max(0, currentHealth);
-
-            OnDamageTaken(damage);
-
-            if (currentHealth <= 0)
+            if (combatController == null)
             {
-                Die();
+                Debug.LogError($"Enemy '{gameObject.name}' não pode receber dano sem CombatController!");
+                return;
             }
+
+            // CombatController é a ÚNICA fonte de verdade
+            Vector2 attackDirection = Vector2.zero; // Direção neutra para ataques legacy
+            combatController.TakeDamage(damage, attackDirection);
         }
 
         /// <summary>
-        /// Mata o inimigo instantaneamente
+        /// Método chamado pelo CombatController quando o inimigo morre
+        /// APENAS para notificar o spawner - NÃO gerencia morte
         /// </summary>
         public virtual void Die()
         {
-            if (isDead) return;
-
-            isDead = true;
+            // APENAS notifica o spawner - CombatController gerencia a morte
             OnDeath();
-
-            // Notifica o spawner sobre a morte
             spawner?.OnEnemyDeath();
 
             if (destroyOnDeath)
@@ -81,32 +87,22 @@ namespace EnemySystem
             }
         }
 
-        /// <summary>
-        /// Cura o inimigo
-        /// </summary>
-        public virtual void Heal(float healAmount)
-        {
-            if (isDead) return;
-
-            currentHealth += healAmount;
-            currentHealth = Mathf.Min(health, currentHealth);
-            OnHealed(healAmount);
-        }
-
         #endregion
 
-        #region Protected Virtual Methods
+        #region Event Callbacks (Chamados pelo CombatController)
 
         /// <summary>
-        /// Chamado quando o inimigo recebe dano
+        /// Callback para quando o inimigo recebe dano - apenas para logs/efeitos
         /// </summary>
-        protected virtual void OnDamageTaken(float damage)
+        public virtual void OnDamageTaken(float damage)
         {
-            Debug.Log($"{gameObject.name} took {damage} damage. Health: {currentHealth}/{health}");
+            float currentHP = Health;
+            float maxHP = MaxHealth;
+            Debug.Log($"{gameObject.name} took {damage} damage. Health: {currentHP}/{maxHP}");
         }
 
         /// <summary>
-        /// Chamado quando o inimigo morre
+        /// Callback para quando o inimigo morre - apenas para efeitos
         /// </summary>
         protected virtual void OnDeath()
         {
@@ -121,13 +117,16 @@ namespace EnemySystem
         }
 
         /// <summary>
-        /// Chamado quando o inimigo é curado
+        /// Callback para quando o inimigo é curado - apenas para logs/efeitos
         /// </summary>
         protected virtual void OnHealed(float healAmount)
         {
-            Debug.Log($"{gameObject.name} healed {healAmount}. Health: {currentHealth}/{health}");
+            float currentHP = Health;
+            float maxHP = MaxHealth;
+            Debug.Log($"{gameObject.name} healed {healAmount}. Health: {currentHP}/{maxHP}");
         }
 
+    
         #endregion
 
         #region Editor Support
@@ -146,10 +145,16 @@ namespace EnemySystem
             if (Application.isPlaying)
             {
                 Gizmos.color = Color.green;
-                float healthPercentage = currentHealth / health;
-                Vector3 currentHealthSize = new Vector3(healthBarSize.x * healthPercentage, healthBarSize.y, healthBarSize.z);
-                Vector3 currentHealthPos = healthBarPos - Vector3.right * (healthBarSize.x - currentHealthSize.x) * 0.5f;
-                Gizmos.DrawCube(currentHealthPos, currentHealthSize);
+                float currentHP = Health;
+                float maxHP = MaxHealth;
+                
+                if (maxHP > 0)
+                {
+                    float healthPercentage = currentHP / maxHP;
+                    Vector3 currentHealthSize = new Vector3(healthBarSize.x * healthPercentage, healthBarSize.y, healthBarSize.z);
+                    Vector3 currentHealthPos = healthBarPos - Vector3.right * (healthBarSize.x - currentHealthSize.x) * 0.5f;
+                    Gizmos.DrawCube(currentHealthPos, currentHealthSize);
+                }
             }
         }
 
