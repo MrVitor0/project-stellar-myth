@@ -60,6 +60,24 @@ namespace CombatSystem
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
         }
         
+        public void IncreaseMaxHealth(float amount)
+        {
+            maxHealth += amount;
+            OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        }
+        
+        public void IncreaseMaxStamina(float amount)
+        {
+            maxStamina += amount;
+            OnStaminaChanged?.Invoke(currentStamina, maxStamina);
+        }
+        
+        public void RestoreStamina(float amount)
+        {
+            currentStamina = Mathf.Min(maxStamina, currentStamina + amount);
+            OnStaminaChanged?.Invoke(currentStamina, maxStamina);
+        }
+        
         public bool ConsumeStamina(float staminaCost)
         {
             if (currentStamina >= staminaCost)

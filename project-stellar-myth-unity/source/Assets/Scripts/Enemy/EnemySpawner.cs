@@ -22,6 +22,7 @@ namespace EnemySystem
         [SerializeField] private Transform[] spawnPoints;
         [SerializeField] private bool startAutomatically = true;
         [SerializeField] private bool debugMode = false;
+        [SerializeField] private bool pauseForShop = false; // Nova opção para pausar para loja
 
         [Header("Events")]
         public UnityEvent OnWaveStarted;
@@ -109,6 +110,26 @@ namespace EnemySystem
                 StopWaveSystem();
                 AdvanceToNextWave();
             }
+        }
+
+        /// <summary>
+        /// Continua para a próxima wave (usado pelo sistema de loja)
+        /// </summary>
+        public void ContinueToNextWave()
+        {
+            if (!isSpawning && !allWavesCompleted)
+            {
+                AdvanceToNextWave();
+            }
+        }
+
+        /// <summary>
+        /// Define se o spawner deve pausar para loja entre waves
+        /// </summary>
+        public void SetPauseForShop(bool pause)
+        {
+            pauseForShop = pause;
+            Log($"Pause for shop set to: {pause}");
         }
 
         /// <summary>
@@ -333,7 +354,13 @@ namespace EnemySystem
             Log($"Wave completed: {completedWave?.WaveName}");
             
             OnWaveCompleted?.Invoke();
-            AdvanceToNextWave();
+            
+            // Se pauseForShop está ativo, não avança automaticamente
+            // O WaveShopController vai controlar quando avançar
+            if (!pauseForShop)
+            {
+                AdvanceToNextWave();
+            }
         }
 
         /// <summary>
