@@ -1,10 +1,11 @@
 using UnityEngine;
+using CombatSystem; // Para acessar o sistema de stamina
 
 public class PlayerController2D : MonoBehaviour
 {
     [Header("Movement Settings")]
     [SerializeField] private float normalSpeed = 5f;
-    [SerializeField] private float runSpeed = 8f;
+    // runSpeed removido - apenas velocidade normal agora
     [SerializeField] private float currentSpeed;
     [SerializeField] private float movementSmoothing = 0.05f;
     private Vector2 movementDirection;
@@ -15,6 +16,7 @@ public class PlayerController2D : MonoBehaviour
     [SerializeField] private float dashForce = 15f;
     [SerializeField] private float dashDuration = 0.2f;
     [SerializeField] private float dashCooldownTime = 1f;
+    [SerializeField] private float dashStaminaCost = 20f; // Stamina necessária para dar dash
     private bool canUseDash = true;
     private bool isExecutingDash = false;
     private float currentDashTime = 0f;
@@ -46,7 +48,7 @@ public class PlayerController2D : MonoBehaviour
     {
         Idle,
         Walking,
-        Running,
+        // Running removido - apenas Walking e Dash agora
         Dash
     }
 
@@ -61,12 +63,27 @@ public class PlayerController2D : MonoBehaviour
 
     // Reference to animation component
     private Animator animator;
+    
+    // Reference to combat system for stamina management
+    private ICombatController combatController;
+    private CombatAttributes combatAttributes;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         currentSpeed = normalSpeed;
+        
+        // Conecta com o sistema de combate para gerenciar stamina
+        combatController = GetComponent<ICombatController>();
+        if (combatController != null)
+        {
+            combatAttributes = combatController.Attributes;
+        }
+        else
+        {
+            Debug.LogWarning("PlayerController2D: Não encontrou ICombatController! Dash não consumirá stamina.");
+        }
     }
 
     private void Update()
@@ -99,18 +116,11 @@ public class PlayerController2D : MonoBehaviour
         // Store movement direction
         movementDirection = new Vector2(moveHorizontal, moveVertical).normalized;
         
-        // Check if Shift is pressed to run
-        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-        {
-            currentSpeed = runSpeed;
-        }
-        else
-        {
-            currentSpeed = normalSpeed;
-        }
+        // Velocidade sempre normal - sem corrida
+        currentSpeed = normalSpeed;
         
         // Execute dash when pressing Space and available
-        if (Input.GetKeyDown(KeyCode.Space) && canUseDash && movementDirection.magnitude > 0)
+        if (Input.GetKeyDown(KeyCode.Space) && CanUseDash() && movementDirection.magnitude > 0)
         {
             StartDash();
         }
@@ -138,8 +148,39 @@ public class PlayerController2D : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Verifica se pode usar o dash (cooldown + stamina)
+    /// </summary>
+    private bool CanUseDash()
+    {
+        // Verifica cooldown
+        if (!canUseDash) return false;
+        
+        // Verifica stamina
+        if (combatAttributes != null)
+        {
+            return combatAttributes.CurrentStamina >= dashStaminaCost;
+        }
+        
+        // Se não tem sistema de combate, permite dash
+        return true;
+    }
+
     private void StartDash()
     {
+        // Consome stamina antes de executar o dash
+        if (combatAttributes != null)
+        {
+            bool staminaConsumed = combatAttributes.ConsumeStamina(dashStaminaCost);
+            if (!staminaConsumed)
+            {
+                Debug.Log("PlayerController2D: Stamina insuficiente para dash!");
+                return; // Não executa dash se não conseguiu consumir stamina
+            }
+            
+            Debug.Log($"PlayerController2D: Dash executado! Stamina restante: {combatAttributes.CurrentStamina:F1}");
+        }
+        
         isExecutingDash = true;
         canUseDash = false;
         currentDashTime = 0f;
@@ -201,9 +242,9 @@ public class PlayerController2D : MonoBehaviour
         // Control animations through Animator and Blend Trees
         if (animator != null)
         {
-            // Set basic parameters for Animator
+            // Set basic parameters for Animator (removido Correndo - apenas Walking/Dash)
             animator.SetBool("Movendo", isMoving);
-            animator.SetBool("Correndo", currentSpeed == runSpeed && isMoving);
+            // animator.SetBool("Correndo", ...) REMOVIDO - sem corrida
             animator.SetBool("Dash", isExecutingDash);
             animator.SetBool("isWalking", isWalking);
             
@@ -233,8 +274,8 @@ public class PlayerController2D : MonoBehaviour
             // Set real velocity for other animation parameters
             animator.SetFloat("Velocidade", movementDirection.magnitude * (currentSpeed / normalSpeed));
             
-            // Set movement type (walking or running) - useful for multiple Blend Trees
-            animator.SetFloat("TipoMovimento", currentSpeed == runSpeed ? 1f : 0f);
+            // Set movement type - sempre 0f agora (sem corrida)
+            animator.SetFloat("TipoMovimento", 0f);
         }
     }
     
@@ -278,16 +319,9 @@ public class PlayerController2D : MonoBehaviour
         }
         else if (isMoving)
         {
-            if (currentSpeed == runSpeed)
-            {
-                currentState = MovementState.Running;
-                targetAnimationVelocity = 0.75f; // Value for running
-            }
-            else
-            {
-                currentState = MovementState.Walking;
-                targetAnimationVelocity = 0.5f; // Value for walking
-            }
+            // Sempre Walking agora - sem Running
+            currentState = MovementState.Walking;
+            targetAnimationVelocity = 0.5f; // Value for walking
         }
         else
         {
@@ -442,5 +476,47 @@ public class PlayerController2D : MonoBehaviour
             return true;
         
         return false;
+    }
+    
+    // Métodos públicos para acesso às informações do dash
+    
+    /// <summary>
+    /// Retorna se o player pode usar o dash (cooldown + stamina)
+    /// </summary>
+    public bool CanPlayerDash()
+    {
+        return CanUseDash();
+    }
+    
+    /// <summary>
+    /// Retorna o custo de stamina do dash
+    /// </summary>
+    public float GetDashStaminaCost()
+    {
+        return dashStaminaCost;
+    }
+    
+    /// <summary>
+    /// Retorna se está executando dash
+    /// </summary>
+    public bool IsCurrentlyDashing()
+    {
+        return isExecutingDash;
+    }
+    
+    /// <summary>
+    /// Retorna o tempo restante de cooldown do dash
+    /// </summary>
+    public float GetDashCooldownRemaining()
+    {
+        return canUseDash ? 0f : (dashCooldownTime - currentCooldownTime);
+    }
+    
+    /// <summary>
+    /// Retorna a stamina atual do player (se disponível)
+    /// </summary>
+    public float GetCurrentStamina()
+    {
+        return combatAttributes?.CurrentStamina ?? 0f;
     }
 }
