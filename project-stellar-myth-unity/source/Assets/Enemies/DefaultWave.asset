@@ -13,12 +13,75 @@ MonoBehaviour:
   m_Name: DefaultWave
   m_EditorClassIdentifier: 
   waves:
-  - waveName: Default
+  - waveName: Wave 1
+    enemySpawnData:
+    - enemyPrefab: {fileID: 9078136268987416446, guid: b90cbae1a25f24493bf5d4d63bb9c0a3, type: 3}
+      count: 1
+      spawnWeight: 0
+    delayBetweenSpawns: 1
+    waveStartDelay: 0
+  - waveName: Wave 2
     enemySpawnData:
     - enemyPrefab: {fileID: 9078136268987416446, guid: b90cbae1a25f24493bf5d4d63bb9c0a3, type: 3}
       count: 2
       spawnWeight: 0
     delayBetweenSpawns: 1
+    waveStartDelay: 0
+  - waveName: Wave 3
+    enemySpawnData:
+    - enemyPrefab: {fileID: 9078136268987416446, guid: b90cbae1a25f24493bf5d4d63bb9c0a3, type: 3}
+      count: 3
+      spawnWeight: 0
+    delayBetweenSpawns: 1
+    waveStartDelay: 0
+  - waveName: Wave 4
+    enemySpawnData:
+    - enemyPrefab: {fileID: 9078136268987416446, guid: b90cbae1a25f24493bf5d4d63bb9c0a3, type: 3}
+      count: 4
+      spawnWeight: 0
+    delayBetweenSpawns: 1
+    waveStartDelay: 0
+  - waveName: Wave 5
+    enemySpawnData:
+    - enemyPrefab: {fileID: 9078136268987416446, guid: b90cbae1a25f24493bf5d4d63bb9c0a3, type: 3}
+      count: 6
+      spawnWeight: 0
+    delayBetweenSpawns: 1
+    waveStartDelay: 0
+  - waveName: Wave 6
+    enemySpawnData:
+    - enemyPrefab: {fileID: 9078136268987416446, guid: b90cbae1a25f24493bf5d4d63bb9c0a3, type: 3}
+      count: 10
+      spawnWeight: 0
+    delayBetweenSpawns: 1
+    waveStartDelay: 2
+  - waveName: Wave 7
+    enemySpawnData:
+    - enemyPrefab: {fileID: 9078136268987416446, guid: b90cbae1a25f24493bf5d4d63bb9c0a3, type: 3}
+      count: 12
+      spawnWeight: 0
+    delayBetweenSpawns: 1
+    waveStartDelay: 2
+  - waveName: Wave 8
+    enemySpawnData:
+    - enemyPrefab: {fileID: 9078136268987416446, guid: b90cbae1a25f24493bf5d4d63bb9c0a3, type: 3}
+      count: 14
+      spawnWeight: 2
+    delayBetweenSpawns: 1
+    waveStartDelay: 0
+  - waveName: Wave 9
+    enemySpawnData:
+    - enemyPrefab: {fileID: 9078136268987416446, guid: b90cbae1a25f24493bf5d4d63bb9c0a3, type: 3}
+      count: 17
+      spawnWeight: 2
+    delayBetweenSpawns: 1
+    waveStartDelay: 0
+  - waveName: Wave 10
+    enemySpawnData:
+    - enemyPrefab: {fileID: 9078136268987416446, guid: b90cbae1a25f24493bf5d4d63bb9c0a3, type: 3}
+      count: 30
+      spawnWeight: 0
+    delayBetweenSpawns: 2
     waveStartDelay: 0
   timeBetweenWaves: 5
   loopWaves: 1
