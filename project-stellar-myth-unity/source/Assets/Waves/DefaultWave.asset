@@ -16,7 +16,7 @@ MonoBehaviour:
   - waveName: Default
     enemySpawnData:
     - enemyPrefab: {fileID: 9078136268987416446, guid: b90cbae1a25f24493bf5d4d63bb9c0a3, type: 3}
-      count: 15
+      count: 2
       spawnWeight: 0
     delayBetweenSpawns: 1
     waveStartDelay: 0

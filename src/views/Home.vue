@@ -81,7 +81,7 @@
         </div>
 
         <div class="webgl-container aspect-video relative">
-          <div 
+          <div
             class="absolute inset-0 flex items-center justify-center z-10"
             v-if="!gameLoaded"
           >
@@ -94,7 +94,7 @@
                 Initializing blockchain connection
               </p>
               <div class="mt-4 w-64 bg-gray-700 rounded-full h-2 mx-auto">
-                <div 
+                <div
                   class="bg-brazil-green h-2 rounded-full transition-all duration-500"
                   :style="`width: ${loadingProgress}%`"
                 ></div>
@@ -103,17 +103,60 @@
             </div>
           </div>
 
+          <!-- Fullscreen Button -->
+          <button
+            v-if="gameLoaded"
+            @click="toggleFullscreen"
+            class="absolute top-4 right-4 z-20 p-2 bg-dark-night/80 border border-brazil-green/30 rounded-lg hover:bg-brazil-green/20 transition-colors backdrop-blur-sm"
+            title="Tela Cheia (F11 ou F)"
+          >
+            <svg
+              v-if="!isFullscreen"
+              class="w-5 h-5 text-brazil-green"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+              />
+            </svg>
+            <svg
+              v-else
+              class="w-5 h-5 text-brazil-green"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 9V4.5M9 9H4.5M9 9L3.5 3.5M15 9h4.5M15 9V4.5M15 9l5.5-5.5M9 15v4.5M9 15H4.5M9 15l-5.5 5.5M15 15h4.5M15 15v4.5m0-4.5l5.5 5.5"
+              />
+            </svg>
+          </button>
+
           <!-- WebGL Canvas Container -->
-          <div 
-            id="unity-container" 
+          <div
+            id="unity-container"
+            ref="unityContainer"
             class="w-full h-full rounded-lg overflow-hidden"
             :class="{ 'opacity-100': gameLoaded, 'opacity-0': !gameLoaded }"
           >
-            <canvas 
-              id="unity-canvas" 
+            <canvas
+              id="unity-canvas"
               class="w-full h-full block"
-              style="background: #1e293b;"
+              style="background: #1e293b"
             ></canvas>
+
+            <!-- Fullscreen hint -->
+            <div v-if="gameLoaded && !isFullscreen" class="fullscreen-hint">
+              Pressione F ou F11 para tela cheia
+            </div>
           </div>
         </div>
 
@@ -319,6 +362,7 @@
 import HeroContent from "../components/HeroContent.vue";
 import BlessingShowcase from "../components/BlessingShowcase.vue";
 import blessingService from "../utils/BlessingService.js";
+import unityService from "../utils/UnityService.js";
 
 export default {
   name: "Home",
@@ -329,9 +373,11 @@ export default {
   data() {
     return {
       gameLoaded: false,
+      loadingProgress: 0,
+      isFullscreen: false,
       heroData: {
         title: {
-          prefix: "Enter the",
+          prefix: "Forge the Myth. Shape the Game.",
           highlight: "Stellar Myth",
         },
         description:
@@ -357,13 +403,28 @@ export default {
     // Load recent blessings
     this.loadRecentBlessings();
 
-    // Simulate WebGL game loading
-    setTimeout(() => {
-      this.gameLoaded = true;
-    }, 2000);
+    // Initialize Unity WebGL game
+    this.initUnityWebGL();
 
-    // Initialize WebGL context when component mounts
-    this.initWebGL();
+    // Setup Unity service event listeners
+    this.setupUnityEventListeners();
+
+    // Setup keyboard shortcuts
+    this.setupKeyboardShortcuts();
+
+    // Setup fullscreen change listeners
+    this.setupFullscreenListeners();
+  },
+
+  beforeUnmount() {
+    // Cleanup Unity instance
+    unityService.quit();
+
+    // Remove keyboard event listeners
+    this.removeKeyboardShortcuts();
+
+    // Remove fullscreen event listeners
+    this.removeFullscreenListeners();
   },
   methods: {
     loadRecentBlessings() {
@@ -372,12 +433,33 @@ export default {
 
     handleLaunchGame() {
       console.log("Launching game...");
-      // Add game launch logic here
+      // Use Unity service to start the game
+      if (unityService.isUnityLoaded()) {
+        const success = unityService.startGame();
+        if (!success) {
+          console.log("Game is already running or GameManager not found");
+        }
+      } else {
+        console.log("Unity is still loading...");
+      }
     },
 
     handleConnectWallet() {
       console.log("Connecting wallet...");
-      // Add wallet connection logic here
+      // Use Unity service to connect wallet
+      if (unityService.isUnityLoaded()) {
+        const walletData = {
+          address: "0x1234567890abcdef",
+          network: "ethereum",
+          balance: "100.5 ETH",
+        };
+        const success = unityService.connectWallet(walletData);
+        if (!success) {
+          console.log("BlockchainManager not found in Unity or not ready");
+        }
+      } else {
+        console.log("Unity is still loading...");
+      }
     },
 
     handleCreateBlessing() {
@@ -385,31 +467,334 @@ export default {
       // Add blessing creation logic here
     },
 
-    initWebGL() {
-      const canvas = document.getElementById("game-canvas");
+    setupUnityEventListeners() {
+      // Listen to Unity loading progress
+      unityService.on("progress", (progress) => {
+        this.loadingProgress = progress;
+      });
+
+      // Listen to Unity loaded event
+      unityService.on("loaded", (instance) => {
+        this.gameLoaded = true;
+        console.log("Unity WebGL game loaded successfully");
+
+        // Send initial data to Unity
+        this.sendDataToUnity();
+      });
+
+      // Listen to Unity errors
+      unityService.on("error", (error) => {
+        console.error("Unity WebGL loading failed:", error);
+        this.handleWebGLError();
+      });
+    },
+
+    sendDataToUnity() {
+      // Send blessings data to Unity
+      unityService.updateBlessings(this.recentBlessings);
+
+      // Send player stats to Unity
+      const playerData = {
+        stats: this.heroData.stats,
+        blessingsCount: this.recentBlessings.length,
+      };
+      unityService.setPlayerData(playerData);
+    },
+
+    initUnityWebGL() {
+      const canvas = document.querySelector("#unity-canvas");
+      if (!canvas) {
+        console.error("Unity canvas not found");
+        return;
+      }
+
+      // Initialize Unity using the service
+      unityService
+        .initializeUnity(canvas, (progress) => {
+          this.loadingProgress = progress;
+        })
+        .catch((error) => {
+          console.error("Failed to initialize Unity:", error);
+          this.handleWebGLError();
+        });
+    },
+
+    handleWebGLError() {
+      // Fallback to basic WebGL scene if Unity fails to load
+      setTimeout(() => {
+        this.initBasicWebGL();
+        this.gameLoaded = true;
+        this.loadingProgress = 100;
+      }, 1000);
+    },
+
+    initBasicWebGL() {
+      const canvas = document.querySelector("#unity-canvas");
       if (canvas) {
         const gl =
           canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
         if (gl) {
-          console.log("WebGL context initialized successfully");
-          // Here you would integrate your actual WebGL game
-          this.setupWebGLScene(gl);
+          console.log("Basic WebGL context initialized as fallback");
+          this.setupBasicWebGLScene(gl);
         }
       }
     },
 
-    setupWebGLScene(gl) {
-      // Basic WebGL setup - replace with your actual game initialization
+    setupBasicWebGLScene(gl) {
+      // Basic WebGL setup as fallback
       gl.clearColor(0.1, 0.15, 0.25, 1.0);
       gl.clear(gl.COLOR_BUFFER_BIT);
 
-      // Animation loop placeholder
+      // Animation loop
       const animate = () => {
         gl.clear(gl.COLOR_BUFFER_BIT);
         requestAnimationFrame(animate);
       };
       animate();
     },
+
+    // Fullscreen methods
+    toggleFullscreen() {
+      if (!this.isFullscreen) {
+        this.enterFullscreen();
+      } else {
+        this.exitFullscreen();
+      }
+    },
+
+    enterFullscreen() {
+      const container = this.$refs.unityContainer;
+      if (container) {
+        if (container.requestFullscreen) {
+          container.requestFullscreen();
+        } else if (container.webkitRequestFullscreen) {
+          container.webkitRequestFullscreen();
+        } else if (container.msRequestFullscreen) {
+          container.msRequestFullscreen();
+        } else if (container.mozRequestFullScreen) {
+          container.mozRequestFullScreen();
+        }
+      }
+    },
+
+    exitFullscreen() {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      }
+    },
+
+    // Keyboard shortcuts
+    setupKeyboardShortcuts() {
+      this.handleKeydown = (event) => {
+        // F11 or F key for fullscreen (only when game is loaded)
+        if (
+          this.gameLoaded &&
+          (event.key === "F11" || event.key === "f" || event.key === "F")
+        ) {
+          event.preventDefault();
+          this.toggleFullscreen();
+        }
+
+        // ESC to exit fullscreen
+        if (event.key === "Escape" && this.isFullscreen) {
+          event.preventDefault();
+          this.exitFullscreen();
+        }
+      };
+
+      document.addEventListener("keydown", this.handleKeydown);
+    },
+
+    removeKeyboardShortcuts() {
+      if (this.handleKeydown) {
+        document.removeEventListener("keydown", this.handleKeydown);
+      }
+    },
+
+    // Fullscreen change listeners
+    setupFullscreenListeners() {
+      this.handleFullscreenChange = () => {
+        const newFullscreenState = !!(
+          document.fullscreenElement ||
+          document.webkitFullscreenElement ||
+          document.msFullscreenElement ||
+          document.mozFullScreenElement
+        );
+
+        this.isFullscreen = newFullscreenState;
+
+        // Notify Unity about fullscreen change
+        if (unityService.isUnityLoaded()) {
+          unityService.setFullscreenMode(newFullscreenState);
+        }
+      };
+
+      // Add listeners for different browsers
+      document.addEventListener(
+        "fullscreenchange",
+        this.handleFullscreenChange
+      );
+      document.addEventListener(
+        "webkitfullscreenchange",
+        this.handleFullscreenChange
+      );
+      document.addEventListener(
+        "msfullscreenchange",
+        this.handleFullscreenChange
+      );
+      document.addEventListener(
+        "mozfullscreenchange",
+        this.handleFullscreenChange
+      );
+    },
+
+    removeFullscreenListeners() {
+      if (this.handleFullscreenChange) {
+        document.removeEventListener(
+          "fullscreenchange",
+          this.handleFullscreenChange
+        );
+        document.removeEventListener(
+          "webkitfullscreenchange",
+          this.handleFullscreenChange
+        );
+        document.removeEventListener(
+          "msfullscreenchange",
+          this.handleFullscreenChange
+        );
+        document.removeEventListener(
+          "mozfullscreenchange",
+          this.handleFullscreenChange
+        );
+      }
+    },
   },
 };
 </script>
+
+<style scoped>
+#unity-container {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  transition: all 0.3s ease;
+}
+
+#unity-container:hover {
+  border-color: rgba(34, 197, 94, 0.4);
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.1);
+}
+
+/* Fullscreen styles */
+#unity-container:fullscreen {
+  background: #000;
+  border: none;
+  border-radius: 0;
+}
+
+#unity-container:-webkit-full-screen {
+  background: #000;
+  border: none;
+  border-radius: 0;
+}
+
+#unity-container:-moz-full-screen {
+  background: #000;
+  border: none;
+  border-radius: 0;
+}
+
+#unity-container:-ms-fullscreen {
+  background: #000;
+  border: none;
+  border-radius: 0;
+}
+
+/* Canvas styles in fullscreen */
+#unity-container:fullscreen #unity-canvas,
+#unity-container:-webkit-full-screen #unity-canvas,
+#unity-container:-moz-full-screen #unity-canvas,
+#unity-container:-ms-fullscreen #unity-canvas {
+  border-radius: 0;
+}
+
+#unity-canvas {
+  cursor: crosshair;
+}
+
+.webgl-container {
+  background: radial-gradient(
+    circle at center,
+    rgba(34, 197, 94, 0.05) 0%,
+    transparent 70%
+  );
+}
+
+/* Fullscreen button styles */
+.webgl-container button {
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.webgl-container button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
+}
+
+/* Responsive adjustments for Unity container */
+@media (max-width: 768px) {
+  .webgl-container {
+    aspect-ratio: 16/10; /* Slightly taller on mobile for better gameplay */
+  }
+}
+
+/* Loading animation improvements */
+.animate-spin {
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Progress bar styling */
+.bg-gray-700 {
+  background-color: rgba(55, 65, 81, 0.8);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.bg-brazil-green {
+  background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+}
+
+/* Fullscreen indicator */
+.fullscreen-hint {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: #22c55e;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 30;
+}
+
+#unity-container:hover .fullscreen-hint {
+  opacity: 1;
+}
+</style>
