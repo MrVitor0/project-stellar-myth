@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
+using TMPro;
 
 /// <summary>
 /// Gerenciador da loja que aparece entre waves
@@ -10,8 +11,14 @@ public class ShopManager : MonoBehaviour
     [Header("Shop UI References")]
     [SerializeField] private GameObject shopPanel;
     [SerializeField] private Button[] optionButtons = new Button[3];
-    [SerializeField] private Text[] optionTexts = new Text[3];
+    [SerializeField] private TextMeshProUGUI[] optionTexts = new TextMeshProUGUI[3];
     [SerializeField] private Image[] optionImages = new Image[3];
+    
+    [Header("Text References - 3 Cards")]
+    [SerializeField] private TextMeshProUGUI[] stellarTransactionIdTexts = new TextMeshProUGUI[3];
+    [SerializeField] private TextMeshProUGUI[] titleTexts = new TextMeshProUGUI[3];
+    [SerializeField] private TextMeshProUGUI[] descriptionTexts = new TextMeshProUGUI[3];
+    [SerializeField] private TextMeshProUGUI[] buffTexts = new TextMeshProUGUI[3];
     
     [Header("Shop Settings")]
     [SerializeField] private ShopOption[] availableOptions;
@@ -82,6 +89,9 @@ public class ShopManager : MonoBehaviour
         }
         
         OnShopOpened?.Invoke();
+        
+        // Atualiza textos específicos da loja
+        UpdateShopTexts();
         
         if (debugMode)
         {
@@ -179,16 +189,23 @@ public class ShopManager : MonoBehaviour
         {
             if (currentOptions[i] != null)
             {
-                // Atualiza texto
+                var option = currentOptions[i];
+                
+                // Atualiza texto principal da opção
                 if (optionTexts[i] != null)
                 {
-                    optionTexts[i].text = $"{currentOptions[i].optionName}\n{currentOptions[i].description}";
+                    // Usa title se disponível, senão usa optionName
+                    string displayTitle = !string.IsNullOrEmpty(option.title) ? option.title : option.optionName;
+                    string displayDescription = option.description;
+                    string buffInfo = !string.IsNullOrEmpty(option.buff) ? $"\n<color=yellow>{option.buff}</color>" : "";
+                    
+                    optionTexts[i].text = $"<b>{displayTitle}</b>\n{displayDescription}{buffInfo}";
                 }
                 
                 // Atualiza imagem
-                if (optionImages[i] != null && currentOptions[i].icon != null)
+                if (optionImages[i] != null && option.icon != null)
                 {
-                    optionImages[i].sprite = currentOptions[i].icon;
+                    optionImages[i].sprite = option.icon;
                 }
                 
                 // Habilita o botão
@@ -253,6 +270,156 @@ public class ShopManager : MonoBehaviour
         }
     }
     
+    private void UpdateShopTexts()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            var option = currentOptions[i];
+            
+            if (option != null)
+            {
+                // Atualiza stellar transaction ID para cada card
+                if (stellarTransactionIdTexts[i] != null)
+                {
+                    string transactionId = !string.IsNullOrEmpty(option.stellarTransactionId) 
+                        ? option.stellarTransactionId 
+                        : GenerateTransactionId();
+                    stellarTransactionIdTexts[i].text = $"ID: {transactionId}";
+                }
+                
+                // Atualiza título para cada card
+                if (titleTexts[i] != null)
+                {
+                    string cardTitle = !string.IsNullOrEmpty(option.title) 
+                        ? option.title 
+                        : option.optionName;
+                    titleTexts[i].text = cardTitle;
+                }
+                
+                // Atualiza descrição para cada card
+                if (descriptionTexts[i] != null)
+                {
+                    descriptionTexts[i].text = option.description;
+                }
+                
+                // Atualiza buff info para cada card
+                if (buffTexts[i] != null)
+                {
+                    string buffInfo = !string.IsNullOrEmpty(option.buff) 
+                        ? option.buff 
+                        : GetDefaultBuffInfo(option.optionType, option.value);
+                    buffTexts[i].text = buffInfo;
+                }
+            }
+            else
+            {
+                // Limpa textos para cards vazios
+                if (stellarTransactionIdTexts[i] != null)
+                    stellarTransactionIdTexts[i].text = "";
+                
+                if (titleTexts[i] != null)
+                    titleTexts[i].text = "";
+                
+                if (descriptionTexts[i] != null)
+                    descriptionTexts[i].text = "";
+                
+                if (buffTexts[i] != null)
+                    buffTexts[i].text = "";
+            }
+        }
+    }
+    
+    private string GenerateTransactionId()
+    {
+        // Gera um ID único baseado no tempo
+        int timestamp = (int)(Time.unscaledTime * 1000) % 100000;
+        int randomSuffix = Random.Range(100, 999);
+        return $"ST-{timestamp:D5}-{randomSuffix}";
+    }
+    
+    private string GetCurrentBuffInfo()
+    {
+        var gameController = GameController.Instance;
+        if (gameController?.PlayerAttributes != null)
+        {
+            var playerAttributes = gameController.PlayerAttributes;
+            float healthPercent = (playerAttributes.CurrentHealth / playerAttributes.MaxHealth) * 100f;
+            float staminaPercent = (playerAttributes.CurrentStamina / playerAttributes.MaxStamina) * 100f;
+            
+            return $"Vida: {healthPercent:F0}% | Stamina: {staminaPercent:F0}%";
+        }
+        return "Status não disponível";
+    }
+    
+    private string GetDefaultBuffInfo(ShopOptionType optionType, float value)
+    {
+        switch (optionType)
+        {
+            case ShopOptionType.HealthUpgrade:
+                return $"+{value} Vida Máxima";
+            case ShopOptionType.StaminaUpgrade:
+                return $"+{value} Stamina Máxima";
+            case ShopOptionType.HealOnly:
+                return $"Cura {value} HP";
+            case ShopOptionType.StaminaRestore:
+                return $"Restaura {value} Stamina";
+            default:
+                return "Efeito Desconhecido";
+        }
+    }
+    
+    /// <summary>
+    /// Atualiza o stellar transaction ID para um card específico (método público para uso externo)
+    /// </summary>
+    public void UpdateStellarTransactionId(int cardIndex, string customId = null)
+    {
+        if (cardIndex >= 0 && cardIndex < stellarTransactionIdTexts.Length && stellarTransactionIdTexts[cardIndex] != null)
+        {
+            stellarTransactionIdTexts[cardIndex].text = customId ?? $"ID: {GenerateTransactionId()}";
+        }
+    }
+    
+    /// <summary>
+    /// Atualiza o título para um card específico (método público para uso externo)
+    /// </summary>
+    public void UpdateTitle(int cardIndex, string newTitle)
+    {
+        if (cardIndex >= 0 && cardIndex < titleTexts.Length && titleTexts[cardIndex] != null)
+        {
+            titleTexts[cardIndex].text = newTitle;
+        }
+    }
+    
+    /// <summary>
+    /// Atualiza a descrição para um card específico (método público para uso externo)
+    /// </summary>
+    public void UpdateDescription(int cardIndex, string newDescription)
+    {
+        if (cardIndex >= 0 && cardIndex < descriptionTexts.Length && descriptionTexts[cardIndex] != null)
+        {
+            descriptionTexts[cardIndex].text = newDescription;
+        }
+    }
+    
+    /// <summary>
+    /// Atualiza o texto de buff para um card específico (método público para uso externo)
+    /// </summary>
+    public void UpdateBuffText(int cardIndex, string newBuffText)
+    {
+        if (cardIndex >= 0 && cardIndex < buffTexts.Length && buffTexts[cardIndex] != null)
+        {
+            buffTexts[cardIndex].text = newBuffText;
+        }
+    }
+    
+    /// <summary>
+    /// Atualiza todos os textos de todos os cards
+    /// </summary>
+    public void UpdateAllCardTexts()
+    {
+        UpdateShopTexts();
+    }
+    
     // Propriedades públicas
     public bool IsShopOpen => isShopOpen;
 }
@@ -267,6 +434,10 @@ public class ShopOption
     public string optionName = "Opção";
     [TextArea(2, 4)]
     public string description = "Descrição da opção";
+    public string stellarTransactionId = "";
+    public string title = "";
+    [TextArea(2, 4)]
+    public string buff = ""; // String descrevendo o buff
     public Sprite icon;
     
     [Header("Effect")]
