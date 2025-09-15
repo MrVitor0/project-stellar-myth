@@ -31,6 +31,7 @@ namespace CombatSystem
         // Estado de combate
         protected float lastAttackTime;
         protected bool isAttacking;
+        protected bool isCombatLocked = false; // Bloqueia ataques quando true
         
         // Componentes
         protected Animator animator;
@@ -38,6 +39,7 @@ namespace CombatSystem
         public CombatAttributes Attributes => attributes;
         public Transform AttackPoint => attackPoint;
         public virtual bool CanAttack => !isAttacking && 
+                                        !isCombatLocked && // Verifica se combate está bloqueado
                                         attributes != null &&
                                         attributes.IsAlive() && 
                                         Time.time >= lastAttackTime + (1f / attributes.AttackSpeed);
@@ -147,6 +149,32 @@ namespace CombatSystem
                 Gizmos.color = Color.red;
                 Gizmos.DrawWireSphere(attackPoint.position, attributes.AttackRange);
             }
+        }
+        
+        /// <summary>
+        /// Bloqueia o sistema de combate, impedindo ataques
+        /// </summary>
+        public virtual void LockCombat()
+        {
+            isCombatLocked = true;
+            Debug.Log($"[COMBAT] {gameObject.name} - Sistema de combate bloqueado!");
+        }
+        
+        /// <summary>
+        /// Desbloqueia o sistema de combate, permitindo ataques
+        /// </summary>
+        public virtual void UnlockCombat()
+        {
+            isCombatLocked = false;
+            Debug.Log($"[COMBAT] {gameObject.name} - Sistema de combate desbloqueado!");
+        }
+        
+        /// <summary>
+        /// Verifica se o sistema de combate está bloqueado
+        /// </summary>
+        public virtual bool IsCombatLocked()
+        {
+            return isCombatLocked;
         }
     }
 }

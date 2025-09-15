@@ -34,6 +34,10 @@ public class AdvancedUIController : MonoBehaviour
     [SerializeField] private bool showValues = true;
     [SerializeField] private bool showPercentage = false;
     
+    [Header("Game Over UI")]
+    [SerializeField] private GameObject gameOverPanel;
+    [SerializeField] private Button restartButton;
+    
     [Header("Player Reference")]
     [SerializeField] private PlayerController2D playerController;
     
@@ -50,6 +54,7 @@ public class AdvancedUIController : MonoBehaviour
     void Start()
     {
         InitializeAdvancedUI();
+        InitializeGameOverUI();
     }
     
     void Update()
@@ -138,6 +143,7 @@ public class AdvancedUIController : MonoBehaviour
         {
             playerAttributes.OnHealthChanged += OnHealthChanged;
             playerAttributes.OnStaminaChanged += OnStaminaChanged;
+            playerAttributes.OnDeath += OnPlayerDeath; // Adiciona evento de morte
         }
     }
     
@@ -344,12 +350,151 @@ public class AdvancedUIController : MonoBehaviour
     public float StaminaPercentage => playerAttributes != null ? 
         playerAttributes.CurrentStamina / playerAttributes.MaxStamina : 0f;
     
+    /// <summary>
+    /// Inicializa o sistema de Game Over UI
+    /// </summary>
+    private void InitializeGameOverUI()
+    {
+        // Garante que o painel de Game Over esteja desabilitado no início
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(false);
+        }
+        
+        // Configura o botão de restart
+        if (restartButton != null)
+        {
+            restartButton.onClick.AddListener(RestartGame);
+        }
+        
+        Debug.Log("AdvancedUIController: Game Over UI inicializada!");
+    }
+    
+    /// <summary>
+    /// Chamado quando o player morre
+    /// </summary>
+    private void OnPlayerDeath()
+    {
+        Debug.Log("AdvancedUIController: Player morreu! Exibindo tela de Game Over...");
+        ShowGameOverScreen();
+    }
+    
+    /// <summary>
+    /// Exibe a tela de Game Over
+    /// </summary>
+    public void ShowGameOverScreen()
+    {
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(true);
+            
+            // Pausa o jogo
+            Time.timeScale = 0f;
+            
+            // Bloqueia movimentos e ataques do player
+            LockPlayerControls();
+            
+            Debug.Log("AdvancedUIController: Tela de Game Over exibida!");
+        }
+        else
+        {
+            Debug.LogWarning("AdvancedUIController: Game Over Panel não está configurado!");
+        }
+    }
+    
+    /// <summary>
+    /// Esconde a tela de Game Over
+    /// </summary>
+    public void HideGameOverScreen()
+    {
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(false);
+            
+            // Resume o jogo
+            Time.timeScale = 1f;
+            
+            // Desbloqueia controles do player (caso necessário)
+            UnlockPlayerControls();
+            
+            Debug.Log("AdvancedUIController: Tela de Game Over escondida!");
+        }
+    }
+    
+    /// <summary>
+    /// Método público para reiniciar o jogo - Conecte este método ao onClick do botão
+    /// </summary>
+    public void RestartGame()
+    {
+        Debug.Log("AdvancedUIController: Reiniciando o jogo...");
+        
+        // Restaura o time scale antes de recarregar a cena
+        Time.timeScale = 1f;
+        
+        // Recarrega a cena atual
+        UnityEngine.SceneManagement.SceneManager.LoadScene(
+            UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+    }
+    
+    /// <summary>
+    /// Bloqueia todos os controles do player (movimento, dash, ataque)
+    /// </summary>
+    private void LockPlayerControls()
+    {
+        if (playerController != null)
+        {
+            // Bloqueia movimentos e dash
+            playerController.LockPlayer();
+        }
+        
+        if (playerCombat != null)
+        {
+            // Bloqueia sistema de combate
+            if (playerCombat is CombatSystem.CombatController combatController)
+            {
+                combatController.LockCombat();
+            }
+        }
+        
+        Debug.Log("AdvancedUIController: Controles do player bloqueados - sem movimento, dash ou ataque!");
+    }
+    
+    /// <summary>
+    /// Desbloqueia todos os controles do player
+    /// </summary>
+    private void UnlockPlayerControls()
+    {
+        if (playerController != null)
+        {
+            // Desbloqueia movimentos e dash
+            playerController.UnlockPlayer();
+        }
+        
+        if (playerCombat != null)
+        {
+            // Desbloqueia sistema de combate
+            if (playerCombat is CombatSystem.CombatController combatController)
+            {
+                combatController.UnlockCombat();
+            }
+        }
+        
+        Debug.Log("AdvancedUIController: Controles do player desbloqueados!");
+    }
+    
     private void OnDestroy()
     {
         if (playerAttributes != null)
         {
             playerAttributes.OnHealthChanged -= OnHealthChanged;
             playerAttributes.OnStaminaChanged -= OnStaminaChanged;
+            playerAttributes.OnDeath -= OnPlayerDeath; // Remove evento de morte
+        }
+        
+        // Remove listener do botão
+        if (restartButton != null)
+        {
+            restartButton.onClick.RemoveListener(RestartGame);
         }
     }
 }

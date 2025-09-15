@@ -8,6 +8,10 @@ public class UIController : MonoBehaviour
     [SerializeField] private Slider healthSlider;
     [SerializeField] private Slider staminaSlider;
     
+    [Header("Game Over UI")]
+    [SerializeField] private GameObject gameOverPanel;
+    [SerializeField] private Button restartButton;
+    
     [Header("Player Reference")]
     [SerializeField] private PlayerController2D playerController;
     
@@ -18,6 +22,7 @@ public class UIController : MonoBehaviour
     void Start()
     {
         InitializeUIController();
+        InitializeGameOverUI();
     }
     
     void Update()
@@ -119,6 +124,7 @@ public class UIController : MonoBehaviour
             // Se inscreve nos eventos do sistema de combate
             playerAttributes.OnHealthChanged += UpdateHealthSlider;
             playerAttributes.OnStaminaChanged += UpdateStaminaSlider;
+            playerAttributes.OnDeath += OnPlayerDeath; // Novo evento para morte do player
         }
     }
     
@@ -178,6 +184,13 @@ public class UIController : MonoBehaviour
         {
             playerAttributes.OnHealthChanged -= UpdateHealthSlider;
             playerAttributes.OnStaminaChanged -= UpdateStaminaSlider;
+            playerAttributes.OnDeath -= OnPlayerDeath; // Remove evento de morte
+        }
+        
+        // Remove listener do botão
+        if (restartButton != null)
+        {
+            restartButton.onClick.RemoveListener(RestartGame);
         }
     }
     
@@ -190,6 +203,138 @@ public class UIController : MonoBehaviour
     public void ManualUpdateStamina(float currentStamina, float maxStamina)
     {
         UpdateStaminaSlider(currentStamina, maxStamina);
+    }
+    
+    /// <summary>
+    /// Inicializa o sistema de Game Over UI
+    /// </summary>
+    private void InitializeGameOverUI()
+    {
+        // Garante que o painel de Game Over esteja desabilitado no início
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(false);
+        }
+        
+        // Configura o botão de restart
+        if (restartButton != null)
+        {
+            restartButton.onClick.AddListener(RestartGame);
+        }
+        
+        Debug.Log("UIController: Game Over UI inicializada!");
+    }
+    
+    /// <summary>
+    /// Chamado quando o player morre
+    /// </summary>
+    private void OnPlayerDeath()
+    {
+        Debug.Log("UIController: Player morreu! Exibindo tela de Game Over...");
+        ShowGameOverScreen();
+    }
+    
+    /// <summary>
+    /// Exibe a tela de Game Over
+    /// </summary>
+    public void ShowGameOverScreen()
+    {
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(true);
+            
+            // Pausa o jogo
+            Time.timeScale = 0f;
+            
+            // Bloqueia movimentos e ataques do player
+            LockPlayerControls();
+            
+            Debug.Log("UIController: Tela de Game Over exibida!");
+        }
+        else
+        {
+            Debug.LogWarning("UIController: Game Over Panel não está configurado!");
+        }
+    }
+    
+    /// <summary>
+    /// Esconde a tela de Game Over
+    /// </summary>
+    public void HideGameOverScreen()
+    {
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(false);
+            
+            // Resume o jogo
+            Time.timeScale = 1f;
+            
+            // Desbloqueia controles do player (caso necessário)
+            UnlockPlayerControls();
+            
+            Debug.Log("UIController: Tela de Game Over escondida!");
+        }
+    }
+    
+    /// <summary>
+    /// Método público para reiniciar o jogo - Conecte este método ao onClick do botão
+    /// </summary>
+    public void RestartGame()
+    {
+        Debug.Log("UIController: Reiniciando o jogo...");
+        
+        // Restaura o time scale antes de recarregar a cena
+        Time.timeScale = 1f;
+        
+        // Recarrega a cena atual
+        UnityEngine.SceneManagement.SceneManager.LoadScene(
+            UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+    }
+    
+    /// <summary>
+    /// Bloqueia todos os controles do player (movimento, dash, ataque)
+    /// </summary>
+    private void LockPlayerControls()
+    {
+        if (playerController != null)
+        {
+            // Bloqueia movimentos e dash
+            playerController.LockPlayer();
+        }
+        
+        if (playerCombat != null)
+        {
+            // Bloqueia sistema de combate
+            if (playerCombat is CombatSystem.CombatController combatController)
+            {
+                combatController.LockCombat();
+            }
+        }
+        
+        Debug.Log("UIController: Controles do player bloqueados - sem movimento, dash ou ataque!");
+    }
+    
+    /// <summary>
+    /// Desbloqueia todos os controles do player
+    /// </summary>
+    private void UnlockPlayerControls()
+    {
+        if (playerController != null)
+        {
+            // Desbloqueia movimentos e dash
+            playerController.UnlockPlayer();
+        }
+        
+        if (playerCombat != null)
+        {
+            // Desbloqueia sistema de combate
+            if (playerCombat is CombatSystem.CombatController combatController)
+            {
+                combatController.UnlockCombat();
+            }
+        }
+        
+        Debug.Log("UIController: Controles do player desbloqueados!");
     }
     
     // Propriedades para acesso externo

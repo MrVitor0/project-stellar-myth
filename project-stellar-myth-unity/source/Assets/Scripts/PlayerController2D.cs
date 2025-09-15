@@ -67,6 +67,9 @@ public class PlayerController2D : MonoBehaviour
     // Reference to combat system for stamina management
     private ICombatController combatController;
     private CombatAttributes combatAttributes;
+    
+    // Control variables
+    private bool isPlayerLocked = false; // Bloqueia todos os movimentos quando true
 
     private void Awake()
     {
@@ -109,6 +112,13 @@ public class PlayerController2D : MonoBehaviour
 
     private void ProcessInputs()
     {
+        // Se o player estiver bloqueado, não processa inputs
+        if (isPlayerLocked)
+        {
+            movementDirection = Vector2.zero;
+            return;
+        }
+        
         // Capture horizontal and vertical inputs (WASD or arrows)
         float moveHorizontal = Input.GetAxisRaw("Horizontal");
         float moveVertical = Input.GetAxisRaw("Vertical");
@@ -518,5 +528,45 @@ public class PlayerController2D : MonoBehaviour
     public float GetCurrentStamina()
     {
         return combatAttributes?.CurrentStamina ?? 0f;
+    }
+    
+    /// <summary>
+    /// Bloqueia todos os movimentos, ataques e dash do player
+    /// </summary>
+    public void LockPlayer()
+    {
+        isPlayerLocked = true;
+        
+        // Para o movimento imediatamente
+        movementDirection = Vector2.zero;
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+        }
+        
+        // Para animações de movimento
+        if (animator != null)
+        {
+            animator.SetFloat("Velocity", 0f);
+        }
+        
+        Debug.Log("PlayerController2D: Player bloqueado - sem movimentos, ataques ou dash!");
+    }
+    
+    /// <summary>
+    /// Desbloqueia o player, permitindo movimentos novamente
+    /// </summary>
+    public void UnlockPlayer()
+    {
+        isPlayerLocked = false;
+        Debug.Log("PlayerController2D: Player desbloqueado - movimentos liberados!");
+    }
+    
+    /// <summary>
+    /// Verifica se o player está bloqueado
+    /// </summary>
+    public bool IsPlayerLocked()
+    {
+        return isPlayerLocked;
     }
 }

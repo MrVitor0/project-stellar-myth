@@ -188,23 +188,38 @@ public class GameController : MonoBehaviour
             Debug.Log("GameController: Player morreu!");
         }
         
-        // You can add death handling logic here
-        // For example: show game over screen, restart level, etc.
+        // Notifica o UIController apropriado para mostrar a tela de Game Over
+        if (useAdvancedUI && advancedUIController != null)
+        {
+            advancedUIController.ShowGameOverScreen();
+        }
+        else if (uiController != null)
+        {
+            uiController.ShowGameOverScreen();
+        }
+        else
+        {
+            Debug.LogWarning("GameController: Nenhum UIController encontrado para mostrar Game Over!");
+        }
+        
+        HandlePlayerDeath();
     }
     
     private void HandlePlayerDeath()
     {
-        // Add your death handling logic here
-        // Examples:
-        // - Pause the game
-        // - Show death screen
-        // - Play death sound
-        // - Start respawn timer
+        // Lógica adicional de morte do player
+        isPlayerAlive = false;
         
         if (debugMode)
         {
-            Debug.Log("GameController: Handling player death...");
+            Debug.Log("GameController: Handling player death - Game Over!");
         }
+        
+        // Aqui você pode adicionar outras lógicas como:
+        // - Parar música de fundo
+        // - Tocar som de morte
+        // - Salvar estatísticas
+        // - etc.
     }
     
     private void HandleDebugInput()
