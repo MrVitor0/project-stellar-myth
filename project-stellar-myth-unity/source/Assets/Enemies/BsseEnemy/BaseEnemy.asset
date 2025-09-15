@@ -19,7 +19,7 @@ MonoBehaviour:
   staminaRegenRate: 10
   attackPower: 25
   attackSpeed: 1
-  attackRange: 1.5
+  attackRange: 2
   staminaCostPerAttack: 15
   healthBarColor: {r: 0, g: 1, b: 0, a: 1}
   staminaBarColor: {r: 0, g: 0, b: 1, a: 1}

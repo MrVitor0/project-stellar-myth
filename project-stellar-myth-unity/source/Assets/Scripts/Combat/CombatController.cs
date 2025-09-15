@@ -85,7 +85,13 @@ namespace CombatSystem
         
         public virtual void Attack()
         {
-            if (!CanAttack || attributes == null) return;
+            Debug.Log($"[COMBAT] {gameObject.name} - Tentando Attack(): CanAttack={CanAttack}, isAttacking={isAttacking}, attributes={attributes != null}");
+
+            if (!CanAttack || attributes == null) 
+            {
+                Debug.Log($"[COMBAT] {gameObject.name} - Attack() cancelado: CanAttack={CanAttack}, attributes={attributes != null}");
+                return;
+            }
             
             // Verifica stamina
             if (!attributes.ConsumeStamina(staminaCostPerAttack))
@@ -93,6 +99,8 @@ namespace CombatSystem
                 OnInsufficientStamina();
                 return;
             }
+            
+            Debug.Log($"[COMBAT] 🚀 {gameObject.name} - Attack() executado com sucesso!");
             
             isAttacking = true;
             lastAttackTime = Time.time;
@@ -122,12 +130,14 @@ namespace CombatSystem
         
         protected virtual void OnInsufficientStamina()
         {
-            Debug.Log($"{gameObject.name} não tem stamina suficiente para atacar!");
+            Debug.Log($"[COMBAT] ⚡ {gameObject.name} não tem stamina suficiente para atacar!");
+            Debug.Log($"[COMBAT] Current Stamina: {attributes?.CurrentStamina}, Required: {staminaCostPerAttack}");
         }
         
         protected virtual void OnAttackComplete()
         {
             isAttacking = false;
+            Debug.Log($"[COMBAT] {gameObject.name} - Ataque completado, isAttacking = false");
         }
         
         protected virtual void OnDrawGizmosSelected()

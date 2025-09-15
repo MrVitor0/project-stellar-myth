@@ -99,10 +99,14 @@ O sistema cria automaticamente, mas você pode ajustar manualmente:
 ### Player:
 - **Mouse Esquerdo**: Atacar
 - **Sistema automático**: Detecção de inimigos no alcance
+- **Efeito visual**: Piscada vermelha quando recebe dano
+- **Sistema de vida**: Pode morrer após receber dano suficiente
 
 ### Inimigos:
 - **Automático**: Integrado com o sistema de pathfinding
 - **Alcance**: Ataca automaticamente quando player está próximo
+- **Inteligência**: Persegue e ataca o jogador agressivamente
+- **Dano ao player**: Causa dano real no jogador
 
 ## 🔧 Personalização
 

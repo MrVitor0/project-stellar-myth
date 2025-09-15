@@ -101,6 +101,8 @@ GameObject:
   - component: {fileID: 7435553490788907816}
   - component: {fileID: 6464876319087655195}
   - component: {fileID: 6988902138477976699}
+  - component: {fileID: 6786272277157215344}
+  - component: {fileID: 3061087858485367824}
   m_Layer: 8
   m_Name: Moreira_Character
   m_TagString: Player
@@ -297,3 +299,52 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.34, y: 0.82}
   m_EdgeRadius: 0
+--- !u!114 &6786272277157215344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6593268203659668921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37d36d4f402ba4d1382c98a7c6639cce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attributes:
+    maxHealth: 100
+    currentHealth: 0
+    maxStamina: 100
+    currentStamina: 0
+    staminaRegenRate: 10
+    attackPower: 25
+    attackSpeed: 1
+    attackRange: 2
+  attackPoint: {fileID: 0}
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 64
+  staminaCostPerAttack: 15
+  debugAttackDetection: 1
+  attackInputName: Fire1
+  alternativeAttackKeys: 650000000d000000
+  damageBlinksCount: 3
+  damageBlinkDuration: 0.1
+  damageBlinkColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!114 &3061087858485367824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6593268203659668921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd681d3c9beff493c898bb4f39b47b81, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 64
+  debugDetection: 1
+  gizmoColor: {r: 1, g: 0, b: 0, a: 1}

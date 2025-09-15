@@ -141,6 +141,9 @@ namespace EnemySystem.Pathfinding
             // Atualiza detecção de travamento
             UpdateStuckDetection();
 
+            // Verifica se pode atacar (independente do estado)
+            CheckAndPerformAttack();
+
             // Determina o próximo estado
             DetermineState();
 
@@ -152,7 +155,8 @@ namespace EnemySystem.Pathfinding
                     break;
 
                 case PathfindingState.Attacking:
-                    PerformAttack();
+                    // Para o movimento durante o ataque
+                    rb.linearVelocity = Vector2.zero;
                     break;
 
                 case PathfindingState.Avoiding:
@@ -180,18 +184,9 @@ namespace EnemySystem.Pathfinding
                 return;
             }
 
-            // Usa o novo sistema de combate se disponível
-            bool inAttackRange = false;
-            if (combatController != null)
-            {
-                inAttackRange = combatController.IsInAttackRange((Vector2)target.position);
-            }
-            else
-            {
-                // Fallback para o sistema antigo
-                inAttackRange = combatBehavior.IsInAttackRange((Vector2)transform.position, (Vector2)target.position);
-            }
-
+            // Verifica se está em alcance de ataque
+            bool inAttackRange = IsInAttackRange();
+            
             if (inAttackRange)
             {
                 currentState = PathfindingState.Attacking;
@@ -205,6 +200,48 @@ namespace EnemySystem.Pathfinding
             }
 
             currentState = PathfindingState.MovingToTarget;
+        }
+
+        #endregion
+
+        #region Attack System (Simplified)
+
+        /// <summary>
+        /// Verifica se está em range de ataque, independente do estado
+        /// </summary>
+        private bool IsInAttackRange()
+        {
+            if (target == null) return false;
+
+            // Usa o novo sistema de combate se disponível
+            if (combatController != null && combatController.Attributes != null)
+            {
+                return combatController.IsInAttackRange((Vector2)target.position);
+            }
+            else
+            {
+                // Fallback para o sistema antigo
+                return combatBehavior.IsInAttackRange((Vector2)transform.position, (Vector2)target.position);
+            }
+        }
+
+        /// <summary>
+        /// Verifica se pode atacar e executa o ataque se possível
+        /// </summary>
+        private void CheckAndPerformAttack()
+        {
+            if (!IsInAttackRange()) return;
+
+            // Usa o novo sistema de combate se disponível
+            if (combatController != null)
+            {
+                combatController.ExecuteAttack();
+            }
+            else
+            {
+                // Fallback para o sistema antigo
+                combatBehavior.PerformAttack();
+            }
         }
 
         #endregion
@@ -228,24 +265,6 @@ namespace EnemySystem.Pathfinding
             // Aplica o movimento em ambos os eixos para jogo top-down
             rb.linearVelocity = movement;
         }
-
-        private void PerformAttack()
-        {
-            // Para o movimento completamente durante o ataque
-            rb.linearVelocity = Vector2.zero;
-            
-            // Usa o novo sistema de combate se disponível
-            if (combatController != null)
-            {
-                combatController.ExecuteAttack();
-            }
-            else
-            {
-                // Fallback para o sistema antigo
-                combatBehavior.PerformAttack();
-            }
-        }
-
 
         #endregion
 

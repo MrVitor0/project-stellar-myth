@@ -15,9 +15,10 @@ GameObject:
   - component: {fileID: 2483870696589112669}
   - component: {fileID: 2586409884723336357}
   - component: {fileID: 7249446458247658892}
-  - component: {fileID: -8448044102218655974}
-  m_Layer: 0
-  m_Name: BaseEnemy (Enemy)
+  - component: {fileID: -6661457922779558078}
+  - component: {fileID: 5762953918409001809}
+  m_Layer: 6
+  m_Name: Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -120,12 +121,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   config:
     moveSpeed: 5
-    stoppingDistance: 0.1
+    stoppingDistance: 1
     drag: 5
     useRotation: 0
     rotationSpeed: 180
     combatType: 0
-    attackRange: 2
+    attackRange: 1.5
     attackCooldown: 1
     avoidanceRadius: 1
     avoidanceForce: 2
@@ -236,7 +237,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &-8448044102218655974
+--- !u!114 &-6661457922779558078
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -245,13 +246,41 @@ MonoBehaviour:
   m_GameObject: {fileID: 9078136268987416446}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3d0e5a3394c4a49e5861002d1110db27, type: 3}
+  m_Script: {fileID: 11500000, guid: 896ff8242eff54a07b8d7ff4eaed06bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  autoSetupOnStart: 1
-  combatantType: 1
-  combatPreset: {fileID: 11400000, guid: 631b61878a3334ff68f99cae6e50a9fe, type: 2}
-  createCombatController: 1
-  createCombatDetector: 1
-  createAttackPoint: 1
-  attackPointOffset: {x: 0, y: 1}
+  attributes:
+    maxHealth: 100
+    currentHealth: 0
+    maxStamina: 100
+    currentStamina: 0
+    staminaRegenRate: 10
+    attackPower: 25
+    attackSpeed: 1
+    attackRange: 1.5
+  attackPoint: {fileID: 0}
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 256
+  staminaCostPerAttack: 15
+  debugEnemyCombat: 1
+  hurtAnimationDuration: 0.5
+  deathAnimationDuration: 1
+  destroyOnDeath: 1
+--- !u!114 &5762953918409001809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9078136268987416446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd681d3c9beff493c898bb4f39b47b81, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 256
+  debugDetection: 1
+  gizmoColor: {r: 1, g: 0, b: 0, a: 1}
