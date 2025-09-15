@@ -3,6 +3,17 @@ using UnityEngine;
 namespace EnemySystem.Pathfinding
 {
     /// <summary>
+    /// Enum para controlar a direção do inimigo (similar ao PlayerController2D)
+    /// </summary>
+    public enum EnemyDirection
+    {
+        Up,
+        Down,
+        Right,
+        Left
+    }
+    
+    /// <summary>
    
     /// Seguindo os princípios SOLID:
     /// - Single Responsibility: Coordena os comportamentos de movimento
@@ -25,6 +36,7 @@ namespace EnemySystem.Pathfinding
         private Rigidbody2D rb;
         private Transform target;
         private SpriteRenderer spriteRenderer; // Para flip do sprite
+        private Animator animator; // Para controlar animações
         
         // Comportamentos (seguindo Dependency Inversion Principle)
         private ICombatBehavior combatBehavior;
@@ -35,6 +47,12 @@ namespace EnemySystem.Pathfinding
         private Vector2 lastPosition;
         private float stuckCheckTimer;
         private int stuckCounter;
+        
+        // Sistema de animação (similar ao PlayerController2D)
+        private EnemyDirection currentDirection = EnemyDirection.Down;
+        private EnemyDirection lastDirection = EnemyDirection.Down;
+        private float directionBlendID = 2f; // Começa olhando para baixo (Down = 2)
+        private bool isWalking = false;
         
         #region Unity Lifecycle
 
@@ -65,6 +83,7 @@ namespace EnemySystem.Pathfinding
             enemy = GetComponent<Enemy>();
             rb = GetComponent<Rigidbody2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
+            animator = GetComponent<Animator>();
             
             if (spriteRenderer == null)
             {
@@ -138,9 +157,13 @@ namespace EnemySystem.Pathfinding
                     break;
 
                 case PathfindingState.Stuck:
-                    HandleStuckState();
+                    //Ignore stuck state for now
+                    MoveTowardsTarget();
                     break;
             }
+
+            // Atualiza animações
+            UpdateAnimations();
 
             // Atualiza posição anterior
             lastPosition = (Vector2)transform.position;
@@ -180,9 +203,6 @@ namespace EnemySystem.Pathfinding
             
             // Aplica o movimento em ambos os eixos (X e Y) para jogo top-down
             rb.linearVelocity = movement;
-            
-            // Orienta o sprite na direção do movimento
-            UpdateSpriteOrientation(movement);
         }
 
         private void AvoidObstacles()
@@ -192,9 +212,6 @@ namespace EnemySystem.Pathfinding
             
             // Aplica o movimento em ambos os eixos para jogo top-down
             rb.linearVelocity = movement;
-            
-            // Orienta o sprite na direção do movimento
-            UpdateSpriteOrientation(movement);
         }
 
         private void PerformAttack()
@@ -202,40 +219,116 @@ namespace EnemySystem.Pathfinding
             // Para o movimento completamente durante o ataque
             rb.linearVelocity = Vector2.zero;
             
-            // Mantém o inimigo olhando para o alvo
-            if (target != null && spriteRenderer != null)
-            {
-                Vector2 directionToTarget = ((Vector2)target.position - (Vector2)transform.position).normalized;
-                UpdateSpriteOrientation(directionToTarget);
-            }
-            
             // Executa o ataque
             combatBehavior.PerformAttack();
         }
 
-        /// <summary>
-        /// Atualiza a orientação do sprite baseado na direção de movimento
-        /// </summary>
-        private void UpdateSpriteOrientation(Vector2 direction)
-        {
-            if (direction == Vector2.zero || spriteRenderer == null)
-                return;
 
-            if (config.useRotation)
+        #endregion
+
+        #region Animation System
+
+        /// <summary>
+        /// Atualiza o sistema de animação (similar ao PlayerController2D)
+        /// </summary>
+        private void UpdateAnimations()
+        {
+            // Verifica se o inimigo está se movendo
+            bool isMoving = rb.linearVelocity.magnitude > 0.1f;
+            bool isTaunting = currentState == PathfindingState.Attacking;
+            
+            // Atualiza direção do inimigo apenas se estiver se movendo E não estiver atacando
+            if (isMoving && !isTaunting)
             {
-                // Rotaciona o sprite na direção do movimento
-                float targetAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-                float currentAngle = transform.eulerAngles.z;
-                float newAngle = Mathf.MoveTowardsAngle(currentAngle, targetAngle, config.rotationSpeed * Time.fixedDeltaTime);
-                transform.rotation = Quaternion.Euler(0, 0, newAngle);
+                UpdateEnemyDirection();
             }
-            else
+            
+            // Define se está caminhando
+            isWalking = isMoving && currentState == PathfindingState.MovingToTarget;
+            
+            // Atualiza o ID da direção para Blend Tree apenas se não estiver atacando
+            if (!isTaunting)
             {
-                // Usa flip horizontal baseado na direção dominante
-                if (Mathf.Abs(direction.x) > 0.1f)
+                UpdateDirectionBlendID();
+            }
+            
+            // Envia parâmetros para o Animator
+            if (animator != null)
+            {
+                animator.SetFloat("DirecaoID", directionBlendID);
+                animator.SetBool("isWalking", isWalking);
+                animator.SetBool("isTaunting", isTaunting);
+                
+                // Parâmetros adicionais que podem ser úteis
+                animator.SetBool("isAttacking", currentState == PathfindingState.Attacking);
+                animator.SetBool("isDead", currentState == PathfindingState.Dead);
+            }
+    
+        }
+        
+        /// <summary>
+        /// Atualiza a direção atual do inimigo baseado no movimento
+        /// </summary>
+        private void UpdateEnemyDirection()
+        {
+            Vector2 movement = rb.linearVelocity.normalized;
+            
+            // Determina direção predominante (up, down, left, right)
+            float absX = Mathf.Abs(movement.x);
+            float absY = Mathf.Abs(movement.y);
+            
+            if (movement.magnitude > 0.1f)
+            {
+                // Salva direção atual como última direção antes de atualizar
+                lastDirection = currentDirection;
+                
+                // Verifica qual componente (x ou y) é dominante para determinar direção
+                if (absX > absY)
                 {
-                    spriteRenderer.flipX = direction.x < 0;
+                    // Movimento horizontal é dominante
+                    if (movement.x > 0)
+                        currentDirection = EnemyDirection.Right;
+                    else
+                        currentDirection = EnemyDirection.Left;
                 }
+                else
+                {
+                    // Movimento vertical é dominante
+                    if (movement.y > 0)
+                        currentDirection = EnemyDirection.Up;
+                    else
+                        currentDirection = EnemyDirection.Down;
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Converte direção do inimigo para valor numérico para Blend Tree
+        /// </summary>
+        private void UpdateDirectionBlendID()
+        {
+            // Define valores distintos para cada direção principal
+            // Norte (Up): 0, Leste (Right): 1, Sul (Down): 2, Oeste (Left): 3
+            // (mesmos valores usados no PlayerController2D)
+            
+            // Usa direção atual quando se movendo, ou última direção conhecida quando parado
+            EnemyDirection directionToUse = rb.linearVelocity.magnitude > 0.1f ? currentDirection : lastDirection;
+            
+            // Converte enum de direção para valor numérico específico
+            switch (directionToUse)
+            {
+                case EnemyDirection.Up:
+                    directionBlendID = 0f;
+                    break;
+                case EnemyDirection.Right:
+                    directionBlendID = 1f;
+                    break;
+                case EnemyDirection.Down:
+                    directionBlendID = 2f;
+                    break;
+                case EnemyDirection.Left:
+                    directionBlendID = 3f;
+                    break;
             }
         }
 
