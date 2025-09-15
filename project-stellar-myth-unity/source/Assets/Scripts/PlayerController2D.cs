@@ -116,7 +116,7 @@ public class PlayerController2D : MonoBehaviour
         }
         
         // Execute punch when pressing left mouse button and available
-        if (Input.GetMouseButtonDown(0) && canUsePunch && !isExecutingDash)
+        if ((Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Return)) && canUsePunch && !isExecutingDash)
         {
             StartPunch();
         }
