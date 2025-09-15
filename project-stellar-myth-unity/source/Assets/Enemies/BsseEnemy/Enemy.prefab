@@ -15,8 +15,9 @@ GameObject:
   - component: {fileID: 2483870696589112669}
   - component: {fileID: 2586409884723336357}
   - component: {fileID: 7249446458247658892}
+  - component: {fileID: 6016094356979182512}
   m_Layer: 0
-  m_Name: Enemy
+  m_Name: New Character (Enemy)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -236,3 +237,22 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &6016094356979182512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9078136268987416446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d0e5a3394c4a49e5861002d1110db27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  autoSetupOnStart: 1
+  combatantType: 1
+  combatPreset: {fileID: 11400000, guid: 631b61878a3334ff68f99cae6e50a9fe, type: 2}
+  createCombatController: 1
+  createCombatDetector: 1
+  createAttackPoint: 1
+  attackPointOffset: {x: 0, y: 1}

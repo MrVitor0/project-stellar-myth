@@ -115,8 +115,8 @@ public class PlayerController2D : MonoBehaviour
             StartDash();
         }
         
-        // Execute punch when pressing left mouse button and available
-        if ((Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Return)) && canUsePunch && !isExecutingDash)
+        // Execute punch when pressing attack input and available  
+        if (GetAttackInput() && canUsePunch && !isExecutingDash)
         {
             StartPunch();
         }
@@ -425,5 +425,22 @@ public class PlayerController2D : MonoBehaviour
                 currentPunchCooldownTime = 0f;
             }
         }
+    }
+    
+    /// <summary>
+    /// Verifica se algum input de ataque foi pressionado
+    /// Compatível com o sistema de combate
+    /// </summary>
+    private bool GetAttackInput()
+    {
+        // Input principal configurado no Input Manager (Fire1 = mouse esquerdo ou ctrl)
+        if (Input.GetButtonDown("Fire1"))
+            return true;
+        
+        // Teclas alternativas (E, Enter)
+        if (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Return))
+            return true;
+        
+        return false;
     }
 }

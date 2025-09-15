@@ -1,4 +1,5 @@
 using UnityEngine;
+using CombatSystem;
 
 namespace EnemySystem.Pathfinding
 {
@@ -37,6 +38,7 @@ namespace EnemySystem.Pathfinding
         private Transform target;
         private SpriteRenderer spriteRenderer; // Para flip do sprite
         private Animator animator; // Para controlar animações
+        private EnemyCombatController combatController; // Sistema de combate
         
         // Comportamentos (seguindo Dependency Inversion Principle)
         private ICombatBehavior combatBehavior;
@@ -84,6 +86,7 @@ namespace EnemySystem.Pathfinding
             rb = GetComponent<Rigidbody2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
             animator = GetComponent<Animator>();
+            combatController = GetComponent<EnemyCombatController>();
             
             if (spriteRenderer == null)
             {
@@ -177,7 +180,19 @@ namespace EnemySystem.Pathfinding
                 return;
             }
 
-            if (combatBehavior.IsInAttackRange((Vector2)transform.position, (Vector2)target.position))
+            // Usa o novo sistema de combate se disponível
+            bool inAttackRange = false;
+            if (combatController != null)
+            {
+                inAttackRange = combatController.IsInAttackRange((Vector2)target.position);
+            }
+            else
+            {
+                // Fallback para o sistema antigo
+                inAttackRange = combatBehavior.IsInAttackRange((Vector2)transform.position, (Vector2)target.position);
+            }
+
+            if (inAttackRange)
             {
                 currentState = PathfindingState.Attacking;
                 return;
@@ -219,8 +234,16 @@ namespace EnemySystem.Pathfinding
             // Para o movimento completamente durante o ataque
             rb.linearVelocity = Vector2.zero;
             
-            // Executa o ataque
-            combatBehavior.PerformAttack();
+            // Usa o novo sistema de combate se disponível
+            if (combatController != null)
+            {
+                combatController.ExecuteAttack();
+            }
+            else
+            {
+                // Fallback para o sistema antigo
+                combatBehavior.PerformAttack();
+            }
         }
 
 
@@ -236,6 +259,13 @@ namespace EnemySystem.Pathfinding
             // Verifica se o inimigo está se movendo
             bool isMoving = rb.linearVelocity.magnitude > 0.1f;
             bool isTaunting = currentState == PathfindingState.Attacking;
+            
+            // Verifica se o inimigo está machucado (novo sistema de combate)
+            bool isHurting = false;
+            if (combatController != null && combatController.Attributes != null)
+            {
+                // Pode implementar lógica adicional aqui se necessário
+            }
             
             // Atualiza direção do inimigo apenas se estiver se movendo E não estiver atacando
             if (isMoving && !isTaunting)
@@ -262,6 +292,9 @@ namespace EnemySystem.Pathfinding
                 // Parâmetros adicionais que podem ser úteis
                 animator.SetBool("isAttacking", currentState == PathfindingState.Attacking);
                 animator.SetBool("isDead", currentState == PathfindingState.Dead);
+                
+                // Novos parâmetros para o sistema de combate
+                // O isHurt e isHurting são controlados pelo EnemyCombatController
             }
     
         }
