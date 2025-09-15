@@ -110,7 +110,7 @@ namespace EnemySystem
             // Parar movimento ao morrer
             if (enemyRigidbody != null)
             {
-                enemyRigidbody.linearVelocity = Vector3.zero;
+                enemyRigidbody.linearVelocity = Vector2.zero;
                 enemyRigidbody.isKinematic = true;
             }
 

@@ -133,9 +133,9 @@ GameObject:
   - component: {fileID: 264810458}
   - component: {fileID: 264810459}
   - component: {fileID: 264810460}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Moreira_Character
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -340,7 +340,7 @@ GameObject:
   - component: {fileID: 493070774}
   - component: {fileID: 493070776}
   - component: {fileID: 493070775}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Foreground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -691,7 +691,7 @@ GameObject:
   m_Component:
   - component: {fileID: 551771901}
   - component: {fileID: 551771902}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Barrers (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -770,7 +770,7 @@ GameObject:
   - component: {fileID: 556332654}
   - component: {fileID: 556332656}
   - component: {fileID: 556332655}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -42168,7 +42168,7 @@ GameObject:
   m_Component:
   - component: {fileID: 703017825}
   - component: {fileID: 703017826}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Shadow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -42287,7 +42287,7 @@ GameObject:
   - component: {fileID: 1111004535}
   - component: {fileID: 1111004539}
   - component: {fileID: 1111004538}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Walls
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -61661,7 +61661,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1580009885}
   - component: {fileID: 1580009886}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Barrers (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -61739,7 +61739,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1963362949}
   - component: {fileID: 1963362950}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Barrers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -61820,7 +61820,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2029145841}
   - component: {fileID: 2029145840}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Grid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -61955,7 +61955,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2096919683}
   - component: {fileID: 2096919684}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Barrers (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
