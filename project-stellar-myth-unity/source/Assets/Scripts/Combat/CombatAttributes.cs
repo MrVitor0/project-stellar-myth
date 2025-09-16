@@ -56,13 +56,17 @@ namespace CombatSystem
         
         public void Heal(float healAmount)
         {
+            float oldHealth = currentHealth;
             currentHealth = Mathf.Min(maxHealth, currentHealth + healAmount);
+            Debug.Log($"CombatAttributes.Heal: Curando {healAmount} HP. Vida: {oldHealth} -> {currentHealth} (Max: {maxHealth})");
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
         }
         
         public void IncreaseMaxHealth(float amount)
         {
+            float oldMaxHealth = maxHealth;
             maxHealth += amount;
+            Debug.Log($"CombatAttributes.IncreaseMaxHealth: Aumentando vida máxima em {amount}. Max: {oldMaxHealth} -> {maxHealth}");
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
         }
         
@@ -80,7 +84,9 @@ namespace CombatSystem
         
         public void IncreaseDamage(float amount)
         {
+            float oldAttackPower = attackPower;
             attackPower += amount;
+            Debug.Log($"CombatAttributes.IncreaseDamage: Aumentando dano em {amount}. Dano: {oldAttackPower} -> {attackPower}");
         }
         
         public bool ConsumeStamina(float staminaCost)

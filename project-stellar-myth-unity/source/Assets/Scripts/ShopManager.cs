@@ -27,7 +27,7 @@ public class ShopManager : MonoBehaviour
     
     [Header("Shop Settings")]
     [SerializeField] private ShopOption[] availableOptions;
-    [SerializeField] private bool debugMode = false;
+    [SerializeField] private bool debugMode = true; // Forçando debug temporariamente
     
     [Header("Events")]
     public UnityEvent OnShopOpened;
@@ -343,17 +343,57 @@ public class ShopManager : MonoBehaviour
     
     private void ApplyShopOption(ShopOption option)
     {
-        // Encontra o player
+        if (debugMode)
+        {
+            Debug.Log($"ShopManager: Tentando aplicar opção {option.optionType} com valor {option.value}");
+        }
+        
+        // Primeira tentativa: usar o GameController.Instance se disponível
         var gameController = GameController.Instance;
+        CombatAttributes playerAttributes = null;
+        
         if (gameController != null && gameController.PlayerAttributes != null)
         {
-            var playerAttributes = gameController.PlayerAttributes;
+            playerAttributes = gameController.PlayerAttributes;
+            if (debugMode)
+            {
+                Debug.Log("ShopManager: Usando PlayerAttributes do GameController.Instance");
+            }
+        }
+        else
+        {
+            // Segunda tentativa: encontrar o player diretamente através do PlayerController2D
+            var playerController = FindObjectOfType<PlayerController2D>();
+            if (playerController != null)
+            {
+                var combatController = playerController.GetComponent<ICombatController>();
+                if (combatController != null && combatController.Attributes != null)
+                {
+                    playerAttributes = combatController.Attributes;
+                    if (debugMode)
+                    {
+                        Debug.Log("ShopManager: Usando PlayerAttributes encontrado diretamente via PlayerController2D");
+                    }
+                }
+            }
+        }
+        
+        if (playerAttributes != null)
+        {
             
             switch (option.optionType)
             {
                 case ShopOptionType.HealthUpgrade:
+                    if (debugMode)
+                    {
+                        Debug.Log($"ShopManager: Aplicando upgrade de vida de {option.value}. Vida antes: {playerAttributes.CurrentHealth}/{playerAttributes.MaxHealth}");
+                    }
                     playerAttributes.IncreaseMaxHealth(option.value);
                     playerAttributes.Heal(option.value); // Também cura
+                    if (debugMode)
+                    {
+                        Debug.Log($"ShopManager: Upgrade de vida aplicado! Vida depois: {playerAttributes.CurrentHealth}/{playerAttributes.MaxHealth}");
+                    }
                     break;
                     
                 case ShopOptionType.StaminaUpgrade:
@@ -362,7 +402,15 @@ public class ShopManager : MonoBehaviour
                     break;
                     
                 case ShopOptionType.HealOnly:
+                    if (debugMode)
+                    {
+                        Debug.Log($"ShopManager: Aplicando cura de {option.value} HP. Vida antes: {playerAttributes.CurrentHealth}/{playerAttributes.MaxHealth}");
+                    }
                     playerAttributes.Heal(option.value);
+                    if (debugMode)
+                    {
+                        Debug.Log($"ShopManager: Cura aplicada! Vida depois: {playerAttributes.CurrentHealth}/{playerAttributes.MaxHealth}");
+                    }
                     break;
                     
                 case ShopOptionType.StaminaRestore:
@@ -391,7 +439,7 @@ public class ShopManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("ShopManager: Não foi possível encontrar o player para aplicar a opção!");
+            Debug.LogError("ShopManager: PlayerAttributes não encontrado! Impossível aplicar a opção da loja.");
         }
     }
     

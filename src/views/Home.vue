@@ -297,44 +297,122 @@
       </div>
     </div>
 
-    <!-- Stats Section -->
+    <!-- Bênçãos Recentes Section -->
     <div
       class="bg-gradient-to-r from-deep-blue/50 to-slate-concrete/80 backdrop-blur-sm py-20"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-          <div class="group">
-            <div
-              class="text-5xl font-bold text-brazil-green mb-2 glow-text group-hover:scale-110 transition-transform duration-300"
-            >
-              1M+
+        <div class="text-center mb-16">
+          <h2 class="text-4xl font-bold text-mist-white mb-4">
+            Bênçãos Recentes
+          </h2>
+          <p class="text-lg text-mid-gray">
+            Descubra as bênçãos mais poderosas criadas pela comunidade
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div
+            v-for="blessing in recentBlessings.slice(0, 6)"
+            :key="blessing.id"
+            class="gaming-card neon-glow group"
+          >
+            <!-- Ícone da Bênção -->
+            <div class="flex items-center justify-center mb-6">
+              <div
+                class="w-20 h-20 bg-gradient-to-br from-brazil-green to-deep-blue rounded-xl flex items-center justify-center relative group-hover:scale-110 transition-transform duration-300"
+              >
+                <!-- Ícone baseado no tipo da bênção -->
+                <svg
+                  v-if="blessing.type === 'Ataque'"
+                  class="w-10 h-10 text-white"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M21,9V7L15,1H5A2,2 0 0,0 3,3V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V9M19,9H14V4H19V9Z"
+                  />
+                </svg>
+                <svg
+                  v-else-if="blessing.type === 'Defesa'"
+                  class="w-10 h-10 text-white"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,7C13.4,7 14.8,7.6 15.6,8.7C16.4,9.8 16.4,11.2 15.6,12.3C14.8,13.4 13.4,14 12,14C10.6,14 9.2,13.4 8.4,12.3C7.6,11.2 7.6,9.8 8.4,8.7C9.2,7.6 10.6,7 12,7Z"
+                  />
+                </svg>
+                <svg
+                  v-else-if="blessing.type === 'Cura'"
+                  class="w-10 h-10 text-white"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M12.8,2.11C14.2,2.39 15.5,3 16.6,3.9L15.5,5.3C14.7,4.6 13.7,4.2 12.6,4L12.8,2.11M7.4,3.9C8.5,3 9.8,2.39 11.2,2.11L11.4,4C10.3,4.2 9.3,4.6 8.5,5.3L7.4,3.9M18.1,7.4L19.5,6.3C20.4,7.4 21,8.7 21.28,10.1L19.39,10.3C19.19,9.2 18.79,8.2 18.1,7.4M5.9,7.4C5.21,8.2 4.81,9.2 4.61,10.3L2.72,10.1C3,8.7 3.6,7.4 4.5,6.3L5.9,7.4M2.11,11.8L4,11.6C4.2,12.7 4.6,13.7 5.3,14.5L3.9,15.6C3,14.5 2.39,13.2 2.11,11.8M21.89,11.8C21.61,13.2 21,14.5 20.1,15.6L18.7,14.5C19.4,13.7 19.8,12.7 20,11.6L21.89,11.8M6.3,19.5C7.4,20.4 8.7,21 10.1,21.28L9.9,19.39C8.8,19.19 7.8,18.79 7,18.1L6.3,19.5M17.7,19.5L17,18.1C17.8,17.4 18.2,16.4 18.4,15.3L20.28,15.5C20,16.9 19.4,18.2 18.5,19.3L17.7,19.5M11.8,21.89C13.2,21.61 14.5,21 15.6,20.1L14.5,18.7C13.7,19.4 12.7,19.8 11.6,20L11.8,21.89Z"
+                  />
+                </svg>
+                <svg
+                  v-else-if="blessing.type === 'Suporte'"
+                  class="w-10 h-10 text-white"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M16,12A2,2 0 0,1 18,10A2,2 0 0,1 20,12A2,2 0 0,1 18,14A2,2 0 0,1 16,12M10,12A2,2 0 0,1 12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12M4,12A2,2 0 0,1 6,10A2,2 0 0,1 8,12A2,2 0 0,1 6,14A2,2 0 0,1 4,12Z"
+                  />
+                </svg>
+                <svg
+                  v-else
+                  class="w-10 h-10 text-white"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M12,2L13.09,8.26L22,9L13.09,9.74L12,16L10.91,9.74L2,9L10.91,8.26L12,2Z"
+                  />
+                </svg>
+              </div>
             </div>
-            <div class="text-mid-gray">Active Players</div>
-          </div>
-          <div class="group">
-            <div
-              class="text-5xl font-bold text-brazil-yellow mb-2 group-hover:scale-110 transition-transform duration-300"
-            >
-              $50M
+
+            <h3 class="text-xl font-semibold text-mist-white mb-2 text-center">
+              {{ blessing.name }}
+            </h3>
+
+            <p class="text-mid-gray text-sm mb-4 line-clamp-3 text-center">
+              {{ blessing.description }}
+            </p>
+
+            <div class="flex justify-between items-center mb-4">
+              <div class="text-brazil-yellow font-semibold">
+                {{ blessing.power }} Poder
+              </div>
+              <div class="text-xs text-mid-gray">
+                por {{ blessing.creator }}
+              </div>
             </div>
-            <div class="text-mid-gray">Trading Volume</div>
-          </div>
-          <div class="group">
-            <div
-              class="text-5xl font-bold text-brazil-green mb-2 glow-text group-hover:scale-110 transition-transform duration-300"
-            >
-              10K+
+
+            <div class="pt-4 border-t border-brazil-green/20">
+              <div class="flex justify-between text-xs text-mid-gray">
+                <span class="flex items-center">
+                  <span
+                    class="w-2 h-2 rounded-full bg-brazil-green/60 mr-2"
+                  ></span>
+                  {{ blessing.type }}
+                </span>
+                <span>{{ blessing.dateCreated }}</span>
+              </div>
             </div>
-            <div class="text-mid-gray">NFT Items</div>
           </div>
-          <div class="group">
-            <div
-              class="text-5xl font-bold text-brazil-yellow mb-2 group-hover:scale-110 transition-transform duration-300"
-            >
-              24/7
-            </div>
-            <div class="text-mid-gray">Live Blockchain</div>
-          </div>
+        </div>
+
+        <!-- Ver Todas as Bênçãos -->
+        <div class="text-center mt-12">
+          <button @click="handleCreateBlessing" class="btn-primary mr-4">
+            Criar Nova Bênção
+          </button>
+          <button class="btn-secondary">Ver Todas as Bênçãos</button>
         </div>
       </div>
     </div>
@@ -952,34 +1030,50 @@ export default {
   }
 }
 
-/* Progress bar styling */
-.bg-gray-700 {
-  background-color: rgba(55, 65, 81, 0.8);
-  border: 1px solid rgba(34, 197, 94, 0.2);
+/* Bênçãos Recentes Section Styles */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.bg-brazil-green {
-  background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+/* Blessing card hover effects */
+.gaming-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(34, 197, 94, 0.15);
 }
 
-/* Fullscreen indicator */
-.fullscreen-hint {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.7);
-  color: #22c55e;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 30;
+/* Blessing icon container */
+.gaming-card .bg-gradient-to-br {
+  background: linear-gradient(135deg, #22c55e 0%, #1e40af 100%);
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2);
 }
 
-#unity-container:hover .fullscreen-hint {
-  opacity: 1;
+.gaming-card:hover .bg-gradient-to-br {
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.3);
+}
+
+/* Rarity badge styles */
+.gaming-card .bg-brazil-green\/90 {
+  background: rgba(34, 197, 94, 0.9);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Type indicator dot */
+.w-2.h-2.rounded-full {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 </style>
