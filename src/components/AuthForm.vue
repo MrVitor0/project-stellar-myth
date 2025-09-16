@@ -161,7 +161,7 @@
       <!-- Registration Form -->
       <div v-if="activeTab === 'register'" class="space-y-4">
         <h3 class="text-xl font-bold text-brazil-yellow glow-text mb-6">
-          Join the community
+          Join the forge/myth
         </h3>
 
         <!-- Mensagens de erro/sucesso -->
@@ -348,7 +348,7 @@ export default {
           emit("login-success", result.user);
 
           // Redirecionar após login bem-sucedido
-          router.push("/community");
+          router.push("/forge/myth");
         } else {
           errorMessage.value = result.error || "Login failed";
         }
@@ -374,7 +374,7 @@ export default {
           emit("login-success", result.user);
 
           // Redirecionar após login bem-sucedido
-          router.push("/community");
+          router.push("/forge/myth");
         } else {
           errorMessage.value = result.error || "Google login failed";
         }
@@ -400,7 +400,7 @@ export default {
           emit("login-success", result.user);
 
           // Redirecionar após login bem-sucedido
-          router.push("/community");
+          router.push("/forge/myth");
         } else {
           errorMessage.value = result.error || "Facebook login failed";
         }
@@ -450,7 +450,7 @@ export default {
           emit("register-success", result.user);
 
           // Redirecionar após registro bem-sucedido
-          router.push("/community");
+          router.push("/forge/myth");
         } else {
           errorMessage.value = result.error || "Registration failed";
         }

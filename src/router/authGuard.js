@@ -23,7 +23,7 @@ export default async function authGuard(to, from, next) {
     (to.path === "/login" || to.path === "/register") &&
     isAuthenticated
   ) {
-    next({ path: "/community" });
+    next({ path: "/forge/myth" });
   }
   // Em qualquer outro caso, permite o acesso à rota
   else {

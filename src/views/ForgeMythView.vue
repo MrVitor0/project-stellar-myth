@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-screen blockchain-pattern">
+    <Navbar />
     <div class="container mx-auto px-4 py-12">
       <h1 class="text-4xl font-bold text-brazil-yellow glow-text mb-6">
         Legend's Forge
@@ -17,11 +18,13 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import AuthService from "@/services/AuthService";
 import LegendForge from "@/components/LegendForge.vue";
+import Navbar from "@/components/Navbar.vue";
 
 export default {
   name: "ForgeMythView",
   components: {
     LegendForge,
+    Navbar,
   },
   setup() {
     const router = useRouter();
