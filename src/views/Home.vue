@@ -483,11 +483,11 @@ export default {
         description:
           "Your creation becomes their adventure. A collaborative Hack and Slash where every power-up is forged by a player, immortalized on-chain, and shared with the entire community.",
         primaryButton: {
-          text: "Launch Game",
+          text: "Forge a New Myth",
           icon: "Play",
         },
         secondaryButton: {
-          text: "Forge a New Myth",
+          text: "Launch Game",
           icon: "Iron",
         },
         stats: {

@@ -13,7 +13,7 @@
 
       <div class="cta-buttons">
         <button
-          @click="launchGame"
+          @click="$router.push('/forge/myth')"
           class="btn-primary inline-flex items-center justify-center group"
         >
           <component
@@ -24,7 +24,7 @@
         </button>
 
         <button
-          @click="$router.push('/forge/myth')"
+          @click="launchGame"
           class="btn-secondary group inline-flex items-center justify-center"
         >
           {{ secondaryButton.text }}
