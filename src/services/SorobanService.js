@@ -396,52 +396,140 @@ class SorobanService {
     }
   }
 
+  scValToNative(scVal) {
+    return StellarSdk.xdr.ScVal.fromXDR(scVal.toXDR(), "base64").toXDRObject();
+  }
+
   /**
    * Obtém as últimas N opções do contrato
    */
   async getLastNOptions(n = 10) {
     try {
-      console.log(`🔍 Getting last ${n} options from contract`);
+      console.log(`🔍 Buscando as últimas ${n} opções do contrato...`);
 
-      // Criar operação de consulta
+      // Criar uma conta temporária para a simulação (sem usar saldo)
+      const tempKeypair = StellarSdk.Keypair.random();
+      const tempAccount = new StellarSdk.Account(
+        tempKeypair.publicKey(),
+        "0" // Sequence number 0 para simulação
+      );
+
+      // Criar operação de contrato para chamar get_last_n_options
       const contract = new StellarSdk.Contract(this.contractAddress);
       const operation = contract.call(
         "get_last_n_options",
         StellarSdk.xdr.ScVal.scvU32(n)
       );
 
-      // Criar transação temporária para simular
-      const account = await this.server.loadAccount(
-        StellarSdk.Keypair.random().publicKey()
-      );
-      const transaction = new StellarSdk.TransactionBuilder(account, {
-        fee: StellarSdk.BASE_FEE,
+      // Construir transação para simulação
+      const transaction = new StellarSdk.TransactionBuilder(tempAccount, {
+        fee: "0", // Taxa 0 para simulação
         networkPassphrase: this.networkPassphrase,
       })
         .addOperation(operation)
         .setTimeout(30)
         .build();
 
-      // Simular transação para obter resultado
+      // Simular transação (não consome recursos da rede)
+      console.log("⚡ Simulando chamada do contrato...");
       const simulateResponse = await this.sorobanServer.simulateTransaction(
         transaction
       );
 
+      // Verificar se houve erro na simulação
       if (StellarSdk.rpc.Api.isSimulationError(simulateResponse)) {
+        console.error("❌ Erro na simulação:", simulateResponse.error);
         throw new Error(`Simulation error: ${simulateResponse.error}`);
       }
 
-      // Processar resultado
-      if (simulateResponse.result && simulateResponse.result.retval) {
-        const options = this.scValToJsOptions(simulateResponse.result.retval);
-        console.log(`✅ Retrieved ${options.length} options`);
-        return options;
+      // Extrair o resultado da simulação
+      const result = simulateResponse.result.retval;
+
+      // Método 1: Usar a função nativa do Stellar SDK (recomendado)
+      // const nativeResult = StellarSdk.scValToNative(result);
+
+      // Método 2: Usar nossa função personalizada (mantendo compatibilidade)
+      const options = this.scValToJsOptions(result);
+      return options;
+    } catch (error) {
+      console.error("❌ Erro ao buscar opções do contrato:", error);
+
+      // Em caso de erro, retornar array vazio ou dados de fallback
+      console.log("🔄 Retornando dados de fallback...");
+      return [];
+    }
+  }
+
+  /**
+   * Obtém as últimas N opções do contrato usando scValToNative do SDK
+   */
+  async getLastNOptionsWithNativeConverter(n = 10) {
+    try {
+      console.log(
+        `🔍 Buscando as últimas ${n} opções do contrato (usando scValToNative)...`
+      );
+
+      // Criar uma conta temporária para a simulação (sem usar saldo)
+      const tempKeypair = StellarSdk.Keypair.random();
+      const tempAccount = new StellarSdk.Account(
+        tempKeypair.publicKey(),
+        "0" // Sequence number 0 para simulação
+      );
+
+      // Criar operação de contrato para chamar get_last_n_options
+      const contract = new StellarSdk.Contract(this.contractAddress);
+      const operation = contract.call(
+        "get_last_n_options",
+        StellarSdk.xdr.ScVal.scvU32(n)
+      );
+
+      // Construir transação para simulação
+      const transaction = new StellarSdk.TransactionBuilder(tempAccount, {
+        fee: "0", // Taxa 0 para simulação
+        networkPassphrase: this.networkPassphrase,
+      })
+        .addOperation(operation)
+        .setTimeout(30)
+        .build();
+
+      // Simular transação (não consome recursos da rede)
+      console.log("⚡ Simulando chamada do contrato...");
+      const simulateResponse = await this.sorobanServer.simulateTransaction(
+        transaction
+      );
+
+      // Verificar se houve erro na simulação
+      if (StellarSdk.rpc.Api.isSimulationError(simulateResponse)) {
+        console.error("❌ Erro na simulação:", simulateResponse.error);
+        throw new Error(`Simulation error: ${simulateResponse.error}`);
       }
 
-      return [];
+      // Extrair o resultado da simulação e converter usando a função nativa do SDK
+      const result = simulateResponse.result.retval;
+      console.log(
+        "🔄 Convertendo resultado ScVal usando scValToNative...",
+        result
+      );
+
+      // Usar scValToNative diretamente do Stellar SDK
+      const nativeResult = StellarSdk.scValToNative(result);
+      console.log("📋 Resultado nativo:", nativeResult);
+
+      // Se o resultado é um array, retornar diretamente
+      if (Array.isArray(nativeResult)) {
+        console.log(`✅ ${nativeResult.length} opções carregadas do contrato`);
+        return nativeResult;
+      }
+
+      // Se não é array, pode ser um único item
+      const options = Array.isArray(nativeResult)
+        ? nativeResult
+        : [nativeResult];
+      console.log(`✅ ${options.length} opções carregadas do contrato`);
+      return options;
     } catch (error) {
-      console.error("❌ Error getting options:", error);
-      throw error;
+      console.error("❌ Erro ao buscar opções do contrato:", error);
+      return [];
     }
   }
 
@@ -450,23 +538,164 @@ class SorobanService {
    */
   scValToJsOptions(scVal) {
     try {
-      // Esta é uma implementação simplificada
-      // Em produção, você precisaria de uma conversão mais robusta
-      if (scVal.instance && scVal.instance().vec) {
-        return scVal
-          .instance()
-          .vec()
-          .map((item) => ({
-            // Conversão básica - você pode expandir isso conforme necessário
-            optionName: "Converted Option",
-            description: "Converted from contract",
-            // ... outros campos
-          }));
+      console.log("🔄 Convertendo ScVal para opções JS...");
+
+      // Verificar o tipo do ScVal
+      const scValType = scVal.switch();
+      console.log("📝 Tipo do ScVal:", scValType.name);
+
+      if (scValType === StellarSdk.xdr.ScValType.scvVec()) {
+        // É um vetor (array) de opções
+        const vec = scVal.vec();
+        return vec.map((item, index) => {
+          console.log(`🔄 Convertendo item ${index}...`);
+          return this.scValToJsOption(item);
+        });
+      } else if (scValType === StellarSdk.xdr.ScValType.scvMap()) {
+        // É um mapa (object) - pode ser uma única opção
+        return [this.scValToJsOption(scVal)];
+      } else {
+        console.log("⚠️ Tipo ScVal não reconhecido para conversão de opções");
+        return [];
       }
-      return [];
     } catch (error) {
-      console.error("Error converting ScVal to JS options:", error);
+      console.error("❌ Erro ao converter ScVal para opções JS:", error);
       return [];
+    }
+  }
+
+  /**
+   * Converte um único ScVal para uma opção JavaScript
+   */
+  scValToJsOption(scVal) {
+    try {
+      const scValType = scVal.switch();
+
+      if (scValType === StellarSdk.xdr.ScValType.scvMap()) {
+        const map = scVal.map();
+        const option = {};
+
+        // Converter cada entrada do mapa
+        map.forEach((entry) => {
+          const key = this.scValToJsValue(entry.key());
+          const value = this.scValToJsValue(entry.val());
+
+          // Mapear os nomes das chaves do contrato para JavaScript
+          switch (key) {
+            case "buff":
+              option.buff = value;
+              break;
+            case "cost":
+              option.cost = typeof value === "bigint" ? Number(value) : value;
+              break;
+            case "description":
+              option.description = value;
+              break;
+            case "icon":
+              option.icon = value;
+              break;
+            case "option_name":
+              option.optionName = value;
+              break;
+            case "option_type":
+              option.optionType = value;
+              break;
+            case "owner":
+              option.owner = value;
+              break;
+            case "rarity":
+              option.rarity = value;
+              break;
+            case "stellar_transaction_id":
+              option.stellarTransactionId = value;
+              break;
+            case "title":
+              option.title = value;
+              break;
+            case "value":
+              option.value = typeof value === "bigint" ? Number(value) : value;
+              break;
+            default:
+              option[key] = value;
+          }
+        });
+
+        return option;
+      } else {
+        console.log(
+          "⚠️ ScVal não é um mapa para conversão de opção individual"
+        );
+        return {
+          rawValue: this.scValToJsValue(scVal),
+          type: scValType.name,
+        };
+      }
+    } catch (error) {
+      console.error("❌ Erro ao converter ScVal para opção JS:", error);
+      return {
+        error: error.message,
+        rawScVal: scVal,
+      };
+    }
+  }
+
+  /**
+   * Converte um ScVal para valor JavaScript básico
+   */
+  scValToJsValue(scVal) {
+    try {
+      const scValType = scVal.switch();
+
+      switch (scValType.value) {
+        case StellarSdk.xdr.ScValType.scvBool().value:
+          return scVal.b();
+
+        case StellarSdk.xdr.ScValType.scvVoid().value:
+          return null;
+
+        case StellarSdk.xdr.ScValType.scvU32().value:
+          return scVal.u32();
+
+        case StellarSdk.xdr.ScValType.scvI32().value:
+          return scVal.i32();
+
+        case StellarSdk.xdr.ScValType.scvU64().value:
+          return BigInt(scVal.u64().toString());
+
+        case StellarSdk.xdr.ScValType.scvI64().value:
+          return BigInt(scVal.i64().toString());
+
+        case StellarSdk.xdr.ScValType.scvString().value:
+          return scVal.str().toString();
+
+        case StellarSdk.xdr.ScValType.scvSymbol().value:
+          return scVal.sym().toString();
+
+        case StellarSdk.xdr.ScValType.scvBytes().value:
+          return scVal.bytes();
+
+        case StellarSdk.xdr.ScValType.scvAddress().value:
+          return StellarSdk.Address.fromScAddress(scVal.address()).toString();
+
+        case StellarSdk.xdr.ScValType.scvVec().value:
+          return scVal.vec().map((item) => this.scValToJsValue(item));
+
+        case StellarSdk.xdr.ScValType.scvMap().value:
+          const result = {};
+          scVal.map().forEach((entry) => {
+            const key = this.scValToJsValue(entry.key());
+            const value = this.scValToJsValue(entry.val());
+            result[key] = value;
+          });
+          return result;
+
+        default:
+          console.log("⚠️ Tipo ScVal não suportado:", scValType.name);
+          return scVal.toString();
+      }
+    } catch (error) {
+      console.error("❌ Erro ao converter ScVal para valor JS:", error);
+      return scVal.toString();
     }
   }
 }

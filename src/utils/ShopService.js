@@ -9,6 +9,50 @@ class ShopService {
     this.shopOptions = shopOptionsData.shopOptions || [];
     this.rarityWeights = shopOptionsData.rarityWeights || {};
     this.metadata = shopOptionsData.metadata || {};
+    this.contractOptionsLoaded = false;
+  }
+
+  /**
+   * Atualiza as opções da loja com dados vindos do contrato
+   * @param {Array} contractOptions - Opções vindas do contrato
+   */
+  updateOptionsFromContract(contractOptions) {
+    if (contractOptions && contractOptions.length > 0) {
+      // Valida todas as opções antes de atualizar
+      const validOptions = contractOptions.filter((option) =>
+        this.validateOption(option)
+      );
+
+      console.log(
+        `ShopService: ${validOptions.length}/${contractOptions.length} opções válidas carregadas do contrato`
+      );
+
+      this.shopOptions = validOptions;
+      this.contractOptionsLoaded = true;
+
+      // Atualiza metadados
+      this.metadata = {
+        ...this.metadata,
+        totalOptions: validOptions.length,
+        lastUpdated: new Date().toISOString(),
+        source: "contract",
+        contractOptionsLoaded: true,
+      };
+
+      console.log(
+        "✅ ShopService: Opções da loja atualizadas com dados do contrato"
+      );
+    } else {
+      console.warn("⚠️ ShopService: Nenhuma opção válida recebida do contrato");
+    }
+  }
+
+  /**
+   * Verifica se as opções do contrato foram carregadas
+   * @returns {boolean} True se as opções do contrato foram carregadas
+   */
+  isContractOptionsLoaded() {
+    return this.contractOptionsLoaded;
   }
 
   /**
@@ -45,6 +89,12 @@ class ShopService {
    * @returns {Array} Array com 3 opções selecionadas
    */
   getRandomOptions(playerLevel = 1) {
+    // Se não há opções disponíveis, retorna array vazio
+    if (!this.shopOptions || this.shopOptions.length === 0) {
+      console.warn("ShopService: Nenhuma opção disponível na loja");
+      return [];
+    }
+
     const availableOptions = [...this.shopOptions];
     const selectedOptions = [];
 
@@ -289,10 +339,11 @@ class ShopService {
   getDebugInfo() {
     return {
       service: "ShopService",
-      version: "1.0.0",
+      version: "2.0.0",
       totalOptions: this.shopOptions.length,
       validOptions: this.shopOptions.filter((opt) => this.validateOption(opt))
         .length,
+      contractOptionsLoaded: this.contractOptionsLoaded,
       metadata: this.metadata,
       stats: this.getShopStats(),
     };
@@ -306,6 +357,14 @@ class ShopService {
    * @returns {Array} Array com 3 opções diferentes
    */
   getNewRandomOptions(playerLevel = 1, lastSelectedIds = []) {
+    // Se não há opções disponíveis, retorna array vazio
+    if (!this.shopOptions || this.shopOptions.length === 0) {
+      console.warn(
+        "ShopService: Nenhuma opção disponível na loja para seleção"
+      );
+      return [];
+    }
+
     let availableOptions = [...this.shopOptions];
 
     // Remove as últimas opções selecionadas para garantir variedade

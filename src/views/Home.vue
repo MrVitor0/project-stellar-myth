@@ -361,6 +361,7 @@ import UnityParameterTester from "../components/UnityParameterTester.vue";
 import blessingService from "../utils/BlessingService.js";
 import unityService from "../utils/UnityService.js";
 import shopService from "../utils/ShopService.js";
+import SorobanService from "../services/SorobanService.js";
 import Navbar from "../components/Navbar.vue";
 
 export default {
@@ -454,8 +455,84 @@ export default {
     this.removeFullscreenListeners();
   },
   methods: {
-    loadRecentBlessings() {
-      this.recentBlessings = blessingService.getRecentBlessings();
+    async loadRecentBlessings() {
+      try {
+        // Carregar itens do contrato Soroban
+        console.log("🔄 Loading items from Soroban contract...");
+        const contractItems = await SorobanService.getLastNOptions(10);
+        console.log("📦 Contract items loaded:", contractItems);
+
+        // Se há itens do contrato, usar eles
+        if (contractItems && contractItems.length > 0) {
+          // Converter contractItems para o formato de shop options
+          const shopOptions =
+            this.convertContractItemsToShopOptions(contractItems);
+
+          // Atualizar as opções da loja no shopService
+          shopService.updateOptionsFromContract(shopOptions);
+
+          // Para exibição na UI (blessings recentes)
+          this.recentBlessings =
+            this.convertContractItemsToUIFormat(contractItems);
+
+          console.log(
+            "✅ Contract items converted to shop options:",
+            shopOptions.length,
+            "items"
+          );
+        } else {
+          // Caso contrário, usar os dados do blessingService como fallback
+          console.log("📋 No contract items found, using fallback data");
+          this.recentBlessings = blessingService.getRecentBlessings();
+        }
+      } catch (error) {
+        console.error("❌ Error loading items from contract:", error);
+        // Em caso de erro, usar os dados do blessingService como fallback
+        this.recentBlessings = blessingService.getRecentBlessings();
+      }
+    },
+
+    /**
+     * Converte itens do contrato para o formato de shop options
+     * @param {Array} contractItems - Itens do contrato (formato examplitems.json)
+     * @returns {Array} Opções no formato shopOptions.json
+     */
+    convertContractItemsToShopOptions(contractItems) {
+      return contractItems.map((item) => ({
+        optionName: item.optionName || item.title,
+        description: item.description,
+        stellarTransactionId: item.stellarTransactionId,
+        title: item.title || item.optionName,
+        buff: item.buff,
+        icon: item.icon,
+        optionType: item.optionType,
+        value: parseFloat(item.value) || 0,
+        rarity: item.rarity || "common",
+        cost: parseInt(item.cost) || 0,
+        isSpecial: item.isSpecial || false,
+        specialEffects: item.specialEffects || null,
+        owner: item.owner, // Preserva o dono do item do contrato
+      }));
+    },
+
+    /**
+     * Converte itens do contrato para formato de exibição na UI
+     * @param {Array} contractItems - Itens do contrato
+     * @returns {Array} Items formatados para UI de blessings recentes
+     */
+    convertContractItemsToUIFormat(contractItems) {
+      return contractItems.map((item) => ({
+        id: item.stellarTransactionId,
+        name: item.title || item.optionName,
+        description: item.description,
+        power: item.value || 0,
+        creator: item.owner ? item.owner.slice(0, 8) + "..." : "Unknown",
+        rarity: item.rarity || "common",
+        type: item.optionType,
+        buff: item.buff,
+        cost: item.cost || 0,
+        timestamp: new Date().toISOString(),
+      }));
     },
 
     handleLaunchGame() {
@@ -528,6 +605,17 @@ export default {
         console.log("Unity solicitou novas opções da loja");
 
         if (unityService.isUnityLoaded()) {
+          // Verifica se há opções disponíveis
+          if (
+            !shopService.isContractOptionsLoaded() ||
+            shopService.getAllOptions().length === 0
+          ) {
+            console.warn(
+              "⚠️ Unity solicitou novas opções, mas nenhuma opção está disponível. Verifique se os dados do contrato foram carregados."
+            );
+            return;
+          }
+
           // Gera novas opções aleatórias, evitando as últimas selecionadas
           const shopData = shopService.generateNewShopData(
             this.playerLevel,
@@ -543,7 +631,10 @@ export default {
           // Envia para o Unity
           unityService.sendShopOptionsToWebGL(shopData);
 
-          console.log("Novas opções da loja enviadas para Unity:", shopData);
+          console.log(
+            "✅ Novas opções da loja do contrato enviadas para Unity:",
+            shopData
+          );
           console.log("Últimas opções armazenadas:", this.lastShopOptionIds);
         } else {
           console.warn(
@@ -563,6 +654,17 @@ export default {
      */
     updateShopOptions() {
       if (unityService.isUnityLoaded()) {
+        // Verifica se há opções disponíveis
+        if (
+          !shopService.isContractOptionsLoaded() ||
+          shopService.getAllOptions().length === 0
+        ) {
+          console.warn(
+            "⚠️ Nenhuma opção da loja disponível para atualização. Verifique se os dados do contrato foram carregados."
+          );
+          return;
+        }
+
         const shopData = shopService.generateNewShopData(
           this.playerLevel,
           this.heroData.stats,
@@ -575,7 +677,7 @@ export default {
         );
 
         unityService.sendShopOptionsToWebGL(shopData);
-        console.log("Opções da loja atualizadas manualmente:", shopData);
+        console.log("✅ Opções da loja atualizadas manualmente:", shopData);
       }
     },
 
@@ -583,34 +685,62 @@ export default {
       // Send blessings data to Unity
       unityService.updateBlessings(this.recentBlessings);
 
-      // Generate and send NEW random shop options to Unity every time
-      const shopData = shopService.generateNewShopData(
-        this.playerLevel,
-        this.heroData.stats,
-        this.lastShopOptionIds
-      );
+      // Verifica se há opções disponíveis na loja antes de tentar gerar
+      if (
+        !shopService.isContractOptionsLoaded() ||
+        shopService.getAllOptions().length === 0
+      ) {
+        console.warn(
+          "⚠️ Nenhuma opção da loja disponível para enviar ao Unity. Aguardando carregamento do contrato..."
+        );
 
-      // Atualiza o controle das últimas opções selecionadas
-      this.lastShopOptionIds = shopData.options.map(
-        (opt) => opt.stellarTransactionId
-      );
+        // Envia dados mínimos para Unity
+        const emptyShopData = {
+          options: [],
+          playerLevel: this.playerLevel,
+          playerStats: this.heroData.stats,
+          shopMetadata: {
+            version: "2.0.0",
+            timestamp: new Date().toISOString(),
+            sessionId: this.generateSessionId(),
+            totalAvailableOptions: 0,
+            status: "waiting_for_contract",
+          },
+        };
 
-      unityService.sendShopOptionsToWebGL(shopData);
+        unityService.sendShopOptionsToWebGL(emptyShopData);
+      } else {
+        // Generate and send NEW random shop options to Unity every time
+        const shopData = shopService.generateNewShopData(
+          this.playerLevel,
+          this.heroData.stats,
+          this.lastShopOptionIds
+        );
+
+        // Atualiza o controle das últimas opções selecionadas
+        this.lastShopOptionIds = shopData.options.map(
+          (opt) => opt.stellarTransactionId
+        );
+
+        unityService.sendShopOptionsToWebGL(shopData);
+
+        // Log das informações enviadas
+        console.log(
+          "✅ Opções da loja do contrato geradas e enviadas para Unity:",
+          shopData
+        );
+        console.log("IDs das opções enviadas:", this.lastShopOptionIds);
+      }
 
       // Send player stats to Unity
       const playerData = {
         stats: this.heroData.stats,
         blessingsCount: this.recentBlessings.length,
         playerLevel: this.playerLevel,
+        contractOptionsLoaded: shopService.isContractOptionsLoaded(),
       };
       unityService.setPlayerData(playerData);
 
-      // Log das informações enviadas
-      console.log(
-        "Novas opções da loja geradas e enviadas para Unity:",
-        shopData
-      );
-      console.log("IDs das opções enviadas:", this.lastShopOptionIds);
       console.log("Dados do jogador enviados:", playerData);
     },
 
