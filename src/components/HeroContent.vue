@@ -35,22 +35,6 @@
           />
         </button>
       </div>
-
-      <!-- Gaming stats mini preview -->
-      <div class="stats-preview">
-        <div class="stat-item">
-          <Users class="w-4 h-4 text-brazil-green" />
-          <span>{{ stats.players }}</span>
-        </div>
-        <div class="stat-item">
-          <Coins class="w-4 h-4 text-brazil-yellow" />
-          <span>{{ stats.volume }}</span>
-        </div>
-        <div class="stat-item">
-          <Trophy class="w-4 h-4 text-brazil-green" />
-          <span>{{ stats.nfts }}</span>
-        </div>
-      </div>
     </div>
   </div>
 </template>

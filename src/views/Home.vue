@@ -6,23 +6,17 @@
         <div class="flex justify-between items-center">
           <div class="text-2xl font-bold text-brazil-yellow">Stellar Myth</div>
           <div class="hidden md:flex space-x-8">
-            <router-link
-              to="/about"
-              class="text-mid-gray hover:text-brazil-green transition-colors duration-300"
-            >
-              About
-            </router-link>
             <a
               href="#"
               class="text-mid-gray hover:text-brazil-green transition-colors duration-300"
             >
-              Blockchain
+              Forge a Myth
             </a>
             <a
               href="#"
               class="text-mid-gray hover:text-brazil-green transition-colors duration-300"
             >
-              Gaming
+              Join Community
             </a>
           </div>
         </div>
@@ -67,13 +61,18 @@
       </div>
     </div>
 
+    <!-- Legend Forge Section - The 3-step infographic -->
+    <LegendForge />
+
     <!-- WebGL Game Container -->
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
       <div class="gaming-card">
         <div class="text-center mb-8">
-          <h2 class="text-3xl font-bold text-mist-white mb-4">Game Portal</h2>
+          <h2 class="text-3xl font-bold text-mist-white mb-4">
+            Step into the Mythos
+          </h2>
           <p class="text-mid-gray">
-            Experience the immersive world of Stellar Myth
+            Experience the roguelike where every legend is forged by YOU.
           </p>
         </div>
 
@@ -202,103 +201,15 @@
       </div>
     </div>
 
-    <!-- Features Grid -->
-    <div class="mx-auto px-4 sm:px-6 lg:px-8 mb-20">
-      <div class="text-center mb-16">
-        <h2 class="text-4xl font-bold text-mist-white mb-4">
-          Gaming Revolution
-        </h2>
-        <p class="text-lg text-mid-gray">
-          Powered by cutting-edge blockchain technology
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <!-- NFT Gaming -->
-        <div class="gaming-card neon-glow">
-          <div
-            class="w-16 h-16 bg-gradient-to-br from-brazil-green to-deep-blue rounded-xl flex items-center justify-center mb-6 mx-auto"
-          >
-            <svg
-              class="w-8 h-8 text-white"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"
-              />
-            </svg>
-          </div>
-          <h3 class="text-xl font-semibold text-mist-white mb-4 text-center">
-            NFT Assets
-          </h3>
-          <p class="text-mid-gray text-center">
-            Own unique in-game items as NFTs. Trade, collect, and showcase your
-            digital treasures across the metaverse.
-          </p>
-        </div>
-
-        <!-- DeFi Integration -->
-        <div class="gaming-card neon-glow">
-          <div
-            class="w-16 h-16 bg-gradient-to-br from-brazil-yellow to-deep-blue rounded-xl flex items-center justify-center mb-6 mx-auto"
-          >
-            <svg
-              class="w-8 h-8 text-dark-night"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M7,15H9C9,16.08 10.37,17 12,17C13.63,17 15,16.08 15,15C15,13.9 13.96,13.5 11.76,12.97C9.64,12.44 7,11.78 7,9C7,7.21 8.47,5.69 10.5,5.18V3H13.5V5.18C15.53,5.69 17,7.21 17,9H15C15,7.92 13.63,7 12,7C10.37,7 9,7.92 9,9C9,10.1 10.04,10.5 12.24,11.03C14.36,11.56 17,12.22 17,15C17,16.79 15.53,18.31 13.5,18.82V21H10.5V18.82C8.47,18.31 7,16.79 7,15Z"
-              />
-            </svg>
-          </div>
-          <h3 class="text-xl font-semibold text-mist-white mb-4 text-center">
-            DeFi Gaming
-          </h3>
-          <p class="text-mid-gray text-center">
-            Earn cryptocurrency while playing. Stake tokens, provide liquidity,
-            and participate in governance decisions.
-          </p>
-        </div>
-
-        <!-- Metaverse -->
-        <div class="gaming-card neon-glow">
-          <div
-            class="w-16 h-16 bg-gradient-to-br from-brazil-green to-brazil-yellow rounded-xl flex items-center justify-center mb-6 mx-auto"
-          >
-            <svg
-              class="w-8 h-8 text-dark-night"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M12,2A2,2 0 0,1 14,4C14,4.74 13.6,5.39 13,5.73V7H14A7,7 0 0,1 21,14H22A1,1 0 0,1 23,15V18A1,1 0 0,1 22,19H21V20A2,2 0 0,1 19,22H5A2,2 0 0,1 3,20V19H2A1,1 0 0,1 1,18V15A1,1 0 0,1 2,14H3A7,7 0 0,1 10,7H11V5.73C10.4,5.39 10,4.74 10,4A2,2 0 0,1 12,2M7.5,13A2.5,2.5 0 0,0 5,15.5A2.5,2.5 0 0,0 7.5,18A2.5,2.5 0 0,0 10,15.5A2.5,2.5 0 0,0 7.5,13M16.5,13A2.5,2.5 0 0,0 14,15.5A2.5,2.5 0 0,0 16.5,18A2.5,2.5 0 0,0 19,15.5A2.5,2.5 0 0,0 16.5,13Z"
-              />
-            </svg>
-          </div>
-          <h3 class="text-xl font-semibold text-mist-white mb-4 text-center">
-            Metaverse
-          </h3>
-          <p class="text-mid-gray text-center">
-            Explore vast virtual worlds with friends. Build communities, attend
-            events, and shape the digital future.
-          </p>
-        </div>
-      </div>
-    </div>
-
     <!-- Bênçãos Recentes Section -->
-    <div
-      class="bg-gradient-to-r from-deep-blue/50 to-slate-concrete/80 backdrop-blur-sm py-20"
-    >
+    <div class="bg-gradient-to-r backdrop-blur-sm py-20">
       <div class="mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
           <h2 class="text-4xl font-bold text-mist-white mb-4">
-            Bênçãos Recentes
+            Comunity Forge Feed
           </h2>
           <p class="text-lg text-mid-gray">
-            Descubra as bênçãos mais poderosas criadas pela comunidade
+            See the latest player-created powers shaping the game.
           </p>
         </div>
 
@@ -397,35 +308,64 @@
             </div>
           </div>
         </div>
-
-        <!-- Ver Todas as Bênçãos -->
-        <div class="text-center mt-12">
-          <button @click="handleCreateBlessing" class="btn-primary mr-4">
-            Criar Nova Bênção
-          </button>
-          <button class="btn-secondary">Ver Todas as Bênçãos</button>
-        </div>
       </div>
     </div>
 
     <!-- Call to Action -->
-    <div class="py-20">
+    <div class="py-15 pb-20">
       <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
         <h2 class="text-4xl font-bold text-mist-white mb-6">
-          Ready to Begin Your Journey?
+          Your Legacy Awaits
         </h2>
         <p class="text-xl text-mid-gray mb-8">
-          Join thousands of players in the ultimate blockchain gaming experience
+          Become a co-creator of the Stellar Myth universe. Forge your legend
+          today
         </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <button class="btn-primary">Start Playing Now</button>
-          <button class="btn-secondary">
-            <a
-              href="#"
-              class="text-brazil-green hover:text-mystic-cyan transition-colors"
+        <div class="flex flex-col md:flex-row gap-4 justify-center">
+          <button
+            class="px-8 py-4 bg-gradient-to-r from-brazil-yellow to-brazil-yellow/80 text-dark-night font-bold rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-brazil-yellow/20 flex items-center justify-center"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              Learn More
-            </a>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            Forge a New Myth
+          </button>
+
+          <button
+            class="px-8 py-4 bg-gradient-to-r from-mystic-cyan/90 to-mystic-cyan/70 text-dark-night font-bold rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-mystic-cyan/20 flex items-center justify-center"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+              />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            Launch Game
           </button>
         </div>
       </div>
@@ -449,6 +389,7 @@ export default {
     HeroContent,
     BlessingShowcase,
     BlessingCardsStack,
+    LegendForge,
     UnityParameterTester,
   },
   data() {
@@ -492,7 +433,7 @@ export default {
           icon: "Play",
         },
         secondaryButton: {
-          text: "Connect Wallet",
+          text: "Forge a New Myth",
           icon: "Wallet",
         },
         stats: {
