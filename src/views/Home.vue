@@ -77,12 +77,6 @@
           </p>
         </div>
 
-        <!-- Unity Parameter Tester -->
-        <UnityParameterTester
-          :unity-service="unityService"
-          @parameter-sent="handleParameterSent"
-        />
-
         <div class="webgl-container aspect-video relative">
           <div
             class="absolute inset-0 flex items-center justify-center z-10"
@@ -443,6 +437,7 @@
 import HeroContent from "../components/HeroContent.vue";
 import BlessingShowcase from "../components/BlessingShowcase.vue";
 import BlessingCardsStack from "../components/BlessingCardsStack.vue";
+import LegendForge from "../components/LegendForge.vue";
 import UnityParameterTester from "../components/UnityParameterTester.vue";
 import blessingService from "../utils/BlessingService.js";
 import unityService from "../utils/UnityService.js";
