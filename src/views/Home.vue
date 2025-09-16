@@ -265,16 +265,60 @@
               {{ blessing.description }}
             </p>
 
-            <div class="flex justify-between items-center mb-4">
-              <div class="text-brazil-yellow font-semibold">
-                {{ blessing.power }} Poder
+            <!-- Blockchain Data Section -->
+            <div class="pt-4 border-t border-brazil-green/20 mb-4">
+              <!-- Stellar Transaction ID -->
+              <div
+                class="mb-3 p-2 bg-gradient-to-r from-brazil-green/10 to-deep-blue/10 rounded-lg border border-brazil-green/20"
+              >
+                <div class="flex items-center mb-1">
+                  <svg
+                    class="w-4 h-4 text-brazil-green mr-2"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"
+                    />
+                  </svg>
+                  <span class="text-xs font-medium text-brazil-green"
+                    >Stellar Transaction</span
+                  >
+                </div>
+                <div
+                  class="font-mono text-xs text-mist-white bg-dark-night/50 p-2 rounded border break-all"
+                >
+                  {{ blessing.id }}
+                </div>
               </div>
-              <div class="text-xs text-mid-gray">
-                por {{ blessing.creator }}
+
+              <!-- Creator Account -->
+              <div
+                class="mb-3 p-2 bg-gradient-to-r from-deep-blue/10 to-brazil-green/10 rounded-lg border border-deep-blue/20"
+              >
+                <div class="flex items-center mb-1">
+                  <svg
+                    class="w-4 h-4 text-brazil-green mr-2"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.9 1 3 1.9 3 3V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V9M19 9H14V4H19V9Z"
+                    />
+                  </svg>
+                  <span class="text-xs font-medium text-brazil-green"
+                    >Creator</span
+                  >
+                </div>
+                <div
+                  class="font-mono text-xs text-mist-white bg-dark-night/50 p-2 rounded border break-all"
+                >
+                  {{ blessing.creator }}
+                </div>
               </div>
             </div>
 
-            <div class="pt-4 border-t border-brazil-green/20">
+            <div class="pt-2 border-t border-brazil-green/20">
               <div class="flex justify-between text-xs text-mid-gray">
                 <span class="flex items-center">
                   <span
@@ -282,7 +326,33 @@
                   ></span>
                   {{ blessing.type }}
                 </span>
-                <span>{{ blessing.dateCreated }}</span>
+                <span class="flex items-center text-brazil-green/70">
+                  <svg
+                    class="w-3 h-3 mr-1"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle cx="12" cy="12" r="2" />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="8"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="12"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1"
+                      opacity="0.3"
+                    />
+                  </svg>
+                  On-Chain
+                </span>
               </div>
             </div>
           </div>
@@ -526,7 +596,8 @@ export default {
         name: item.title || item.optionName,
         description: item.description,
         power: item.value || 0,
-        creator: item.owner ? item.owner.slice(0, 8) + "..." : "Unknown",
+        creator: item.owner || "Unknown Account", // Manter endereço completo
+        creatorShort: item.owner ? item.owner.slice(0, 8) + "..." : "Unknown", // Versão curta para outros usos
         rarity: item.rarity || "common",
         type: item.optionType,
         buff: item.buff,
