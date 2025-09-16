@@ -42956,7 +42956,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Button
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -43070,29 +43070,72 @@ MonoBehaviour:
   - {fileID: 1523750795}
   - {fileID: 130226763}
   optionTexts:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 700366935983738288}
+  - {fileID: 3489789763133466500}
+  - {fileID: 8602533705393398499}
   optionImages:
   - {fileID: 108008696703246454}
   - {fileID: 4082992581959895618}
   - {fileID: 9197999163459456805}
+  stellarTransactionIdTexts:
+  - {fileID: 3344603699023633013}
+  - {fileID: 1710354180505530433}
+  - {fileID: 5814157632263681318}
+  titleTexts:
+  - {fileID: 7499525179676704611}
+  - {fileID: 5892299452313113943}
+  - {fileID: 1642064255363256368}
+  descriptionTexts:
+  - {fileID: 700366935983738288}
+  - {fileID: 3489789763133466500}
+  - {fileID: 8602533705393398499}
+  buffTexts:
+  - {fileID: 6674092209500670198}
+  - {fileID: 7298416108910764738}
+  - {fileID: 2469451813146617765}
   availableOptions:
   - optionName: Trickster step
     description: exemplo baba
+    stellarTransactionId: 53534534543
+    title: teste
+    buff: Cura a vida toda
     icon: {fileID: 4905026044522211737, guid: 17293df093fc2e44197b149ecffb8866, type: 3}
-    optionType: 0
-    value: 5
+    optionType: 2
+    value: 9999
+    rarity: common
+    cost: 0
+    isSpecial: 0
+    healthBonus: 0
+    staminaBonus: 0
+    damageBonus: 0
   - optionName: Trickster  step 2
     description: exemplo baba
+    stellarTransactionId: 423432423
+    title: teste
+    buff: aumenta a vida em 30
     icon: {fileID: 4905026044522211737, guid: 17293df093fc2e44197b149ecffb8866, type: 3}
     optionType: 0
     value: 5
+    rarity: common
+    cost: 0
+    isSpecial: 0
+    healthBonus: 0
+    staminaBonus: 0
+    damageBonus: 0
   - optionName: Trickster step 3
     description: exemplo baba
+    stellarTransactionId: 4325262
+    title: teste
+    buff: aumenta o dano em 30
     icon: {fileID: 4905026044522211737, guid: 17293df093fc2e44197b149ecffb8866, type: 3}
-    optionType: 0
-    value: 5
+    optionType: 4
+    value: 30
+    rarity: common
+    cost: 0
+    isSpecial: 0
+    healthBonus: 0
+    staminaBonus: 0
+    damageBonus: 0
   debugMode: 0
   OnShopOpened:
     m_PersistentCalls:
@@ -62429,6 +62472,52 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!1 &1146632642
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1146632644}
+  - component: {fileID: 1146632643}
+  m_Layer: 0
+  m_Name: WebGLCommunicator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1146632643
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1146632642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05a940ae07f984eaeafdaea142827f9a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  debugMode: 1
+  gameStarted: 0
+--- !u!4 &1146632644
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1146632642}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 326.40652, y: 842.6574, z: -11.622762}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1237479248
 GameObject:
   m_ObjectHideFlags: 0
@@ -62539,7 +62628,8 @@ MonoBehaviour:
   spawnPoints:
   - {fileID: 996291389}
   startAutomatically: 1
-  debugMode: 0
+  debugMode: 1
+  pauseForShop: 0
   OnWaveStarted:
     m_PersistentCalls:
       m_Calls: []
@@ -65953,3 +66043,4 @@ SceneRoots:
   - {fileID: 1743830130}
   - {fileID: 1092966745}
   - {fileID: 633863387}
+  - {fileID: 1146632644}

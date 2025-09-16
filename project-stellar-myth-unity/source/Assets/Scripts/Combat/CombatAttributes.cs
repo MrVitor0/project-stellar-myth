@@ -78,6 +78,11 @@ namespace CombatSystem
             OnStaminaChanged?.Invoke(currentStamina, maxStamina);
         }
         
+        public void IncreaseDamage(float amount)
+        {
+            attackPower += amount;
+        }
+        
         public bool ConsumeStamina(float staminaCost)
         {
             if (currentStamina >= staminaCost)

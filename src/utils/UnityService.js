@@ -18,9 +18,10 @@ class UnityService {
    * Initialize Unity WebGL instance
    * @param {HTMLCanvasElement} canvas - Canvas element
    * @param {Function} progressCallback - Progress callback function
+   * @param {Object} initParams - Initial parameters to send to Unity
    * @returns {Promise<Object>} Unity instance
    */
-  async initializeUnity(canvas, progressCallback = null) {
+  async initializeUnity(canvas, progressCallback = null, initParams = null) {
     try {
       // Load Unity loader script
       await this.loadUnityScript();
@@ -42,6 +43,14 @@ class UnityService {
 
       this.isLoaded = true;
       this.emit("loaded", this.instance);
+
+      // Send initial parameters if provided
+      if (initParams) {
+        setTimeout(() => {
+          this.sendParameter(initParams);
+        }, 1000); // Small delay to ensure Unity is fully loaded
+      }
+
       return this.instance;
     } catch (error) {
       this.emit("error", error);
@@ -144,6 +153,30 @@ class UnityService {
   }
 
   /**
+   * Send shop options data to Unity
+   * @param {Object} shopData - Shop data with options and metadata
+   */
+  updateShopOptions(shopData) {
+    return this.sendMessage(
+      UnityConfig.gameObjects.gameManager,
+      UnityConfig.methods.updateShopOptions,
+      JSON.stringify(shopData)
+    );
+  }
+
+  /**
+   * Send shop options specifically to WebGLCommunicator
+   * @param {Object} shopData - Shop data with options and metadata
+   */
+  sendShopOptionsToWebGL(shopData) {
+    return this.sendMessage(
+      "WebGLCommunicator",
+      "OnShopOptionsReceivedFromJS",
+      JSON.stringify(shopData)
+    );
+  }
+
+  /**
    * Set player data in the game
    * @param {Object} playerData - Player data object
    */
@@ -152,6 +185,23 @@ class UnityService {
       UnityConfig.gameObjects.gameManager,
       UnityConfig.methods.setPlayerData,
       JSON.stringify(playerData)
+    );
+  }
+
+  /**
+   * Send a custom parameter to Unity
+   * @param {string|Object} parameter - Parameter to send to Unity
+   */
+  sendParameter(parameter) {
+    const parameterValue =
+      typeof parameter === "object"
+        ? JSON.stringify(parameter)
+        : parameter.toString();
+
+    return this.sendMessage(
+      UnityConfig.gameObjects.gameManager,
+      UnityConfig.methods.receiveParameter,
+      parameterValue
     );
   }
 

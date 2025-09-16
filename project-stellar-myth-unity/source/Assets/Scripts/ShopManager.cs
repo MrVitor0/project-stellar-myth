@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using TMPro;
+using CombatSystem;
 
 /// <summary>
 /// Gerenciador da loja que aparece entre waves
@@ -36,6 +37,12 @@ public class ShopManager : MonoBehaviour
     private void Start()
     {
         InitializeShop();
+        
+        // Se houver um WebGLCommunicator, escuta por buffs recebidos
+        if (WebGLCommunicator.Instance != null)
+        {
+            WebGLCommunicator.Instance.OnBuffsReceived += OnWebGLBuffsReceived;
+        }
     }
     
     private void InitializeShop()
@@ -257,16 +264,60 @@ public class ShopManager : MonoBehaviour
                 case ShopOptionType.StaminaRestore:
                     playerAttributes.RestoreStamina(option.value);
                     break;
+                    
+                case ShopOptionType.DamageIncrease:
+                    playerAttributes.IncreaseDamage(option.value);
+                    break;
+            }
+            
+            // Aplica efeitos especiais se a opção for especial
+            if (option.isSpecial)
+            {
+                ApplySpecialEffects(option, playerAttributes);
             }
             
             if (debugMode)
             {
                 Debug.Log($"ShopManager: Aplicado {option.optionType} com valor {option.value}");
+                if (option.isSpecial)
+                {
+                    Debug.Log($"ShopManager: Efeitos especiais aplicados para opção {option.optionName}");
+                }
             }
         }
         else
         {
             Debug.LogWarning("ShopManager: Não foi possível encontrar o player para aplicar a opção!");
+        }
+    }
+    
+    /// <summary>
+    /// Aplica efeitos especiais de uma opção da loja
+    /// </summary>
+    /// <param name="option">Opção com efeitos especiais</param>
+    /// <param name="playerAttributes">Atributos do jogador</param>
+    private void ApplySpecialEffects(ShopOption option, CombatAttributes playerAttributes)
+    {
+        if (option.healthBonus > 0)
+        {
+            playerAttributes.IncreaseMaxHealth(option.healthBonus);
+            playerAttributes.Heal(option.healthBonus);
+        }
+        
+        if (option.staminaBonus > 0)
+        {
+            playerAttributes.IncreaseMaxStamina(option.staminaBonus);
+            playerAttributes.RestoreStamina(option.staminaBonus);
+        }
+        
+        if (option.damageBonus > 0)
+        {
+            playerAttributes.IncreaseDamage(option.damageBonus);
+        }
+        
+        if (debugMode)
+        {
+            Debug.Log($"ShopManager: Efeitos especiais aplicados - Vida: +{option.healthBonus}, Stamina: +{option.staminaBonus}, Dano: +{option.damageBonus}");
         }
     }
     
@@ -363,6 +414,8 @@ public class ShopManager : MonoBehaviour
                 return $"Cura {value} HP";
             case ShopOptionType.StaminaRestore:
                 return $"Restaura {value} Stamina";
+            case ShopOptionType.DamageIncrease:
+                return $"+{value} Dano";
             default:
                 return "Efeito Desconhecido";
         }
@@ -422,6 +475,61 @@ public class ShopManager : MonoBehaviour
     
     // Propriedades públicas
     public bool IsShopOpen => isShopOpen;
+    
+    /// <summary>
+    /// Método chamado quando buffs são recebidos do WebGL
+    /// </summary>
+    /// <param name="jsonData">Dados JSON dos buffs</param>
+    private void OnWebGLBuffsReceived(string jsonData)
+    {
+        if (debugMode)
+        {
+            Debug.Log($"ShopManager: Buffs recebidos do WebGL: {jsonData}");
+        }
+        
+        // TODO: Implementar parsing do JSON para atualizar availableOptions
+        // Por enquanto apenas faz log dos dados recebidos
+        try
+        {
+            if (!string.IsNullOrEmpty(jsonData))
+            {
+                Debug.Log($"ShopManager: Processando {jsonData.Length} caracteres de dados JSON");
+                
+                // Aqui futuramente podemos converter o JSON em ShopOption[]
+                // e atualizar o array availableOptions
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"ShopManager: Erro ao processar buffs do WebGL: {e.Message}");
+        }
+    }
+    
+    /// <summary>
+    /// Método público para atualizar as opções da loja via código externo
+    /// </summary>
+    /// <param name="newOptions">Novas opções para a loja</param>
+    public void UpdateShopOptions(ShopOption[] newOptions)
+    {
+        if (newOptions != null && newOptions.Length > 0)
+        {
+            availableOptions = newOptions;
+            
+            if (debugMode)
+            {
+                Debug.Log($"ShopManager: Opções da loja atualizadas. {newOptions.Length} opções disponíveis.");
+            }
+        }
+    }
+    
+    private void OnDestroy()
+    {
+        // Remove o listener quando o objeto é destruído
+        if (WebGLCommunicator.Instance != null)
+        {
+            WebGLCommunicator.Instance.OnBuffsReceived -= OnWebGLBuffsReceived;
+        }
+    }
 }
 
 /// <summary>
@@ -443,6 +551,16 @@ public class ShopOption
     [Header("Effect")]
     public ShopOptionType optionType = ShopOptionType.HealthUpgrade;
     public float value = 10f;
+    
+    [Header("Extended Properties")]
+    public string rarity = "common";
+    public float cost = 0f;
+    public bool isSpecial = false;
+    
+    [Header("Special Effects (if isSpecial = true)")]
+    public float healthBonus = 0f;
+    public float staminaBonus = 0f;
+    public float damageBonus = 0f;
 }
 
 /// <summary>
@@ -453,5 +571,6 @@ public enum ShopOptionType
     HealthUpgrade,    // Aumenta vida máxima e cura
     StaminaUpgrade,   // Aumenta stamina máxima e restaura
     HealOnly,         // Apenas cura sem aumentar máximo
-    StaminaRestore    // Apenas restaura stamina sem aumentar máximo
+    StaminaRestore,   // Apenas restaura stamina sem aumentar máximo
+    DamageIncrease    // Aumenta o dano do player
 }

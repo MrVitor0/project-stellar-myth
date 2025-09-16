@@ -33,8 +33,8 @@ export const UnityConfig = {
 
   // Game Objects and Methods for Unity communication
   gameObjects: {
-    gameManager: "GameManager",
-    blockchainManager: "BlockchainManager",
+    gameManager: "WebGLCommunicator",
+    blockchainManager: "WebGLCommunicator",
     uiManager: "UIManager",
   },
 
@@ -43,6 +43,9 @@ export const UnityConfig = {
     connectWallet: "ConnectWallet",
     updateBlessings: "UpdateBlessings",
     setPlayerData: "SetPlayerData",
+    receiveParameter: "ReceiveParameter",
+    updateShopOptions: "UpdateShopOptions",
+    sendShopData: "OnShopOptionsReceivedFromJS",
   },
 
   // Error handling

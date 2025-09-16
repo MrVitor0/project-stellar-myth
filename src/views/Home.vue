@@ -80,6 +80,12 @@
           </p>
         </div>
 
+        <!-- Unity Parameter Tester -->
+        <UnityParameterTester
+          :unity-service="unityService"
+          @parameter-sent="handleParameterSent"
+        />
+
         <div class="webgl-container aspect-video relative">
           <div
             class="absolute inset-0 flex items-center justify-center z-10"
@@ -361,20 +367,26 @@
 <script>
 import HeroContent from "../components/HeroContent.vue";
 import BlessingShowcase from "../components/BlessingShowcase.vue";
+import UnityParameterTester from "../components/UnityParameterTester.vue";
 import blessingService from "../utils/BlessingService.js";
 import unityService from "../utils/UnityService.js";
+import shopService from "../utils/ShopService.js";
 
 export default {
   name: "Home",
   components: {
     HeroContent,
     BlessingShowcase,
+    UnityParameterTester,
   },
   data() {
     return {
       gameLoaded: false,
       loadingProgress: 0,
       isFullscreen: false,
+      unityService: unityService, // Adiciona referência ao serviço
+      shopService: shopService, // Adiciona referência ao serviço da loja
+      playerLevel: 1, // Nível do jogador para selecionar opções da loja
       heroData: {
         title: {
           prefix: "Forge the Myth. Shape the Game.",
@@ -493,12 +505,24 @@ export default {
       // Send blessings data to Unity
       unityService.updateBlessings(this.recentBlessings);
 
+      // Generate and send shop options to Unity
+      const shopData = shopService.generateShopData(
+        this.playerLevel,
+        this.heroData.stats
+      );
+      unityService.sendShopOptionsToWebGL(shopData);
+
       // Send player stats to Unity
       const playerData = {
         stats: this.heroData.stats,
         blessingsCount: this.recentBlessings.length,
+        playerLevel: this.playerLevel,
       };
       unityService.setPlayerData(playerData);
+
+      // Log das informações enviadas
+      console.log("Dados da loja enviados para Unity:", shopData);
+      console.log("Dados do jogador enviados:", playerData);
     },
 
     initUnityWebGL() {
@@ -508,15 +532,93 @@ export default {
         return;
       }
 
-      // Initialize Unity using the service
+      // Prepare initial parameters to send to Unity
+      const initParams = {
+        timestamp: Date.now(),
+        sessionId: this.generateSessionId(),
+        gameVersion: "1.0.0",
+        playerSettings: {
+          language: "pt-BR",
+          difficulty: "normal",
+          sound: true,
+        },
+        vueAppData: {
+          stats: this.heroData.stats,
+          blessingsCount: this.recentBlessings.length,
+        },
+      };
+
+      console.log("Inicializando Unity com parâmetros:", initParams);
+
+      // Initialize Unity using the service with initial parameters
       unityService
-        .initializeUnity(canvas, (progress) => {
-          this.loadingProgress = progress;
-        })
+        .initializeUnity(
+          canvas,
+          (progress) => {
+            this.loadingProgress = progress;
+          },
+          initParams // Pass initial parameters
+        )
         .catch((error) => {
           console.error("Failed to initialize Unity:", error);
           this.handleWebGLError();
         });
+    },
+
+    generateSessionId() {
+      return (
+        "session_" + Math.random().toString(36).substr(2, 9) + "_" + Date.now()
+      );
+    },
+
+    handleParameterSent(parameter) {
+      console.log("Parameter sent from Unity Parameter Tester:", parameter);
+      // You can handle the sent parameter here if needed
+    },
+
+    /**
+     * Método para atualizar o nível do jogador
+     * @param {number} newLevel - Novo nível do jogador
+     */
+    updatePlayerLevel(newLevel) {
+      this.playerLevel = Math.max(1, newLevel);
+
+      // Se Unity estiver carregado, envia novos dados da loja
+      if (unityService.isUnityLoaded()) {
+        const shopData = shopService.generateShopData(
+          this.playerLevel,
+          this.heroData.stats
+        );
+        unityService.sendShopOptionsToWebGL(shopData);
+
+        console.log(
+          `Nível do jogador atualizado para ${this.playerLevel}, novas opções da loja enviadas`
+        );
+      }
+    },
+
+    /**
+     * Método para obter informações de debug dos serviços
+     */
+    getDebugInfo() {
+      const debugInfo = {
+        unity: {
+          isLoaded: unityService.isUnityLoaded(),
+          loadingProgress: this.loadingProgress,
+        },
+        shop: shopService.getDebugInfo(),
+        blessings: {
+          count: this.recentBlessings.length,
+          data: this.recentBlessings,
+        },
+        player: {
+          level: this.playerLevel,
+          stats: this.heroData.stats,
+        },
+      };
+
+      console.log("Debug Info:", debugInfo);
+      return debugInfo;
     },
 
     handleWebGLError() {
