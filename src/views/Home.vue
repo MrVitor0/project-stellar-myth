@@ -2,7 +2,7 @@
   <div class="min-h-screen blockchain-pattern">
     <!-- Navigation -->
     <nav class="relative z-50 py-6">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center">
           <div class="text-2xl font-bold text-brazil-yellow">Stellar Myth</div>
           <div class="hidden md:flex space-x-8">
@@ -31,7 +31,7 @@
 
     <!-- Hero Section -->
     <div class="relative py-20">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mx-auto px-4 sm:px-6 lg:px-8">
         <div
           class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[80vh]"
         >
@@ -48,11 +48,14 @@
             />
           </div>
 
-          <!-- Right Column - Blessings Showcase -->
-          <div class="order-1 lg:order-2">
-            <BlessingShowcase
+          <!-- Right Column - Blessing Cards Showcase -->
+          <div
+            class="order-1 lg:order-2 flex items-center justify-center h-[500px]"
+          >
+            <BlessingCardsStack
               :blessings="recentBlessings"
               @create-blessing="handleCreateBlessing"
+              class="w-full h-full"
             />
           </div>
         </div>
@@ -212,7 +215,7 @@
     </div>
 
     <!-- Features Grid -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8 mb-20">
       <div class="text-center mb-16">
         <h2 class="text-4xl font-bold text-mist-white mb-4">
           Gaming Revolution
@@ -301,7 +304,7 @@
     <div
       class="bg-gradient-to-r from-deep-blue/50 to-slate-concrete/80 backdrop-blur-sm py-20"
     >
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
           <h2 class="text-4xl font-bold text-mist-white mb-4">
             Bênçãos Recentes
@@ -445,6 +448,7 @@
 <script>
 import HeroContent from "../components/HeroContent.vue";
 import BlessingShowcase from "../components/BlessingShowcase.vue";
+import BlessingCardsStack from "../components/BlessingCardsStack.vue";
 import UnityParameterTester from "../components/UnityParameterTester.vue";
 import blessingService from "../utils/BlessingService.js";
 import unityService from "../utils/UnityService.js";
@@ -455,6 +459,7 @@ export default {
   components: {
     HeroContent,
     BlessingShowcase,
+    BlessingCardsStack,
     UnityParameterTester,
   },
   data() {
@@ -472,7 +477,7 @@ export default {
           highlight: "Stellar Myth",
         },
         description:
-          "Experience the future of gaming where blockchain technology meets immersive gameplay. Build, trade, and conquer in a decentralized universe powered by your creativity.",
+          "Your creation becomes their adventure. A collaborative Hack and Slash where every power-up is forged by a player, immortalized on-chain, and shared with the entire community.",
         primaryButton: {
           text: "Launch Game",
           icon: "Play",
@@ -1075,5 +1080,14 @@ export default {
   50% {
     opacity: 0.5;
   }
+}
+
+/* Line clamp utility kept for other parts of the Home */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 </style>
