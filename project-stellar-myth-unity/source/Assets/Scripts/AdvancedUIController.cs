@@ -428,6 +428,20 @@ public class AdvancedUIController : MonoBehaviour
     {
         Debug.Log("AdvancedUIController: Reiniciando o jogo...");
         
+        // Reseta o estado do ShopManager antes de recarregar a cena
+        if (ShopManager.Instance != null)
+        {
+            ShopManager.Instance.OnGameRestart();
+            Debug.Log("AdvancedUIController: Estado do ShopManager resetado");
+        }
+        
+        // Reseta também o sistema persistente
+        if (ShopPersistentData.Instance != null)
+        {
+            ShopPersistentData.Instance.ResetShopState();
+            Debug.Log("AdvancedUIController: Sistema persistente da loja resetado");
+        }
+        
         // Restaura o time scale antes de recarregar a cena
         Time.timeScale = 1f;
         

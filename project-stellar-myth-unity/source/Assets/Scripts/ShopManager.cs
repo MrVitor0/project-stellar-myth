@@ -3,12 +3,16 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using TMPro;
 using CombatSystem;
+using System.Collections.Generic;
 
 /// <summary>
 /// Gerenciador da loja que aparece entre waves
 /// </summary>
 public class ShopManager : MonoBehaviour
 {
+    // Singleton para acesso na cena atual (sem DontDestroyOnLoad)
+    public static ShopManager Instance { get; private set; }
+    
     [Header("Shop UI References")]
     [SerializeField] private GameObject shopPanel;
     [SerializeField] private Button[] optionButtons = new Button[3];
@@ -30,9 +34,29 @@ public class ShopManager : MonoBehaviour
     public UnityEvent OnShopClosed;
     public UnityEvent<int> OnOptionSelected;
     
-    // Estado interno
+    // Estado interno (não persistente)
     private bool isShopOpen = false;
     private ShopOption[] currentOptions = new ShopOption[3];
+    
+    private void Awake()
+    {
+        // Singleton simples para a cena atual (sem DontDestroyOnLoad)
+        if (Instance == null)
+        {
+            Instance = this;
+            
+            // Carrega opções do cache persistente se disponível
+            LoadOptionsFromPersistentData();
+        }
+        else
+        {
+            if (debugMode)
+            {
+                Debug.Log("ShopManager: Instância já existe nesta cena, destruindo duplicata");
+            }
+            Destroy(gameObject);
+        }
+    }
     
     private void Start()
     {
@@ -42,6 +66,9 @@ public class ShopManager : MonoBehaviour
         if (WebGLCommunicator.Instance != null)
         {
             WebGLCommunicator.Instance.OnBuffsReceived += OnWebGLBuffsReceived;
+            
+            // Adiciona listener para opções da loja também
+            WebGLCommunicator.Instance.OnShopOptionsReceived += OnShopOptionsReceived;
         }
     }
     
@@ -74,9 +101,27 @@ public class ShopManager : MonoBehaviour
     /// </summary>
     public void OpenShop()
     {
-        if (isShopOpen || availableOptions == null || availableOptions.Length == 0)
+        // Se a loja já está aberta, não faz nada
+        if (isShopOpen)
         {
+            if (debugMode)
+            {
+                Debug.Log("ShopManager: Loja já está aberta");
+            }
             return;
+        }
+        
+        // Verifica se temos opções disponíveis
+        if (availableOptions == null || availableOptions.Length == 0)
+        {
+            Debug.LogWarning("ShopManager: Tentou abrir loja sem opções disponíveis");
+            return;
+        }
+        
+        // Garante que o painel esteja fechado antes de abrir
+        if (shopPanel != null)
+        {
+            shopPanel.SetActive(false);
         }
         
         // Pausa o jogo
@@ -93,6 +138,10 @@ public class ShopManager : MonoBehaviour
         if (shopPanel != null)
         {
             shopPanel.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError("ShopManager: shopPanel é null, a loja não pode ser exibida");
         }
         
         OnShopOpened?.Invoke();
@@ -164,29 +213,57 @@ public class ShopManager : MonoBehaviour
     
     private void GenerateRandomOptions()
     {
-        if (availableOptions.Length <= 3)
+        // Limpa as opções atuais primeiro
+        for (int i = 0; i < currentOptions.Length; i++)
         {
-            // Se temos 3 ou menos opções, usa todas
-            for (int i = 0; i < availableOptions.Length && i < 3; i++)
-            {
-                currentOptions[i] = availableOptions[i];
-            }
+            currentOptions[i] = null;
         }
-        else
+        
+        if (availableOptions == null || availableOptions.Length == 0)
         {
-            // Seleciona 3 opções aleatórias diferentes
-            var usedIndices = new System.Collections.Generic.HashSet<int>();
-            for (int i = 0; i < 3; i++)
+            if (debugMode)
             {
-                int randomIndex;
+                Debug.LogWarning("ShopManager: Nenhuma opção disponível para gerar opções aleatórias");
+            }
+            return;
+        }
+        
+        // Sempre seleciona opções aleatórias, mesmo se tiver 3 ou menos
+        // Isso garante que seja 100% aleatório a cada abertura da loja
+        var usedIndices = new System.Collections.Generic.HashSet<int>();
+        int optionsToGenerate = Mathf.Min(3, availableOptions.Length);
+        
+        for (int i = 0; i < optionsToGenerate; i++)
+        {
+            int randomIndex;
+            
+            // Se temos menos opções que slots, permite repetição após esgotar as únicas
+            if (usedIndices.Count == availableOptions.Length && availableOptions.Length < 3)
+            {
+                // Permite repetição se não temos opções suficientes
+                randomIndex = Random.Range(0, availableOptions.Length);
+            }
+            else
+            {
+                // Garante que não há repetição enquanto há opções únicas disponíveis
                 do
                 {
                     randomIndex = Random.Range(0, availableOptions.Length);
-                } while (usedIndices.Contains(randomIndex));
-                
-                usedIndices.Add(randomIndex);
-                currentOptions[i] = availableOptions[randomIndex];
+                } while (usedIndices.Contains(randomIndex) && usedIndices.Count < availableOptions.Length);
             }
+            
+            usedIndices.Add(randomIndex);
+            currentOptions[i] = availableOptions[randomIndex];
+            
+            if (debugMode)
+            {
+                Debug.Log($"ShopManager: Slot {i} - Selecionada opção '{availableOptions[randomIndex].optionName}' (índice {randomIndex})");
+            }
+        }
+        
+        if (debugMode)
+        {
+            Debug.Log($"ShopManager: Geradas {optionsToGenerate} opções aleatórias de {availableOptions.Length} disponíveis");
         }
     }
     
@@ -473,35 +550,128 @@ public class ShopManager : MonoBehaviour
         UpdateShopTexts();
     }
     
-    // Propriedades públicas
-    public bool IsShopOpen => isShopOpen;
-    
     /// <summary>
-    /// Método chamado quando buffs são recebidos do WebGL
+    /// Método público para reiniciar completamente o estado do jogo
+    /// Deve ser chamado pelo GameController quando o jogador perde e a wave é reiniciada
     /// </summary>
-    /// <param name="jsonData">Dados JSON dos buffs</param>
-    private void OnWebGLBuffsReceived(string jsonData)
+    public void OnGameRestart()
     {
-        if (debugMode)
+        // Reinicia o estado da loja
+        ResetShopState();
+        
+        // Garante que a loja pode ser aberta novamente
+        isShopOpen = false;
+        
+        // Reseta o estado no sistema persistente
+        if (ShopPersistentData.Instance != null)
         {
-            Debug.Log($"ShopManager: Buffs recebidos do WebGL: {jsonData}");
+            ShopPersistentData.Instance.ResetShopState();
         }
         
-        // TODO: Implementar parsing do JSON para atualizar availableOptions
-        // Por enquanto apenas faz log dos dados recebidos
-        try
+        if (debugMode)
         {
-            if (!string.IsNullOrEmpty(jsonData))
+            Debug.Log("ShopManager: Jogo reiniciado, estado da loja redefinido");
+        }
+    }
+    
+    /// <summary>
+    /// Carrega as opções da loja do sistema de dados persistentes
+    /// </summary>
+    private void LoadOptionsFromPersistentData()
+    {
+        // Cria o sistema persistente se não existir
+        if (ShopPersistentData.Instance == null)
+        {
+            CreatePersistentDataObject();
+        }
+        
+        // Carrega opções do cache se disponível
+        if (ShopPersistentData.Instance != null && ShopPersistentData.Instance.HasCachedOptions())
+        {
+            ShopOption[] cachedOptions = ShopPersistentData.Instance.LoadShopOptions();
+            if (cachedOptions != null)
             {
-                Debug.Log($"ShopManager: Processando {jsonData.Length} caracteres de dados JSON");
+                availableOptions = cachedOptions;
                 
-                // Aqui futuramente podemos converter o JSON em ShopOption[]
-                // e atualizar o array availableOptions
+                if (debugMode)
+                {
+                    Debug.Log($"ShopManager: {cachedOptions.Length} opções carregadas do sistema persistente");
+                }
             }
         }
-        catch (System.Exception e)
+    }
+    
+    /// <summary>
+    /// Cria o objeto de dados persistentes se necessário
+    /// </summary>
+    private void CreatePersistentDataObject()
+    {
+        GameObject persistentObject = new GameObject("ShopPersistentData");
+        persistentObject.AddComponent<ShopPersistentData>();
+        
+        if (debugMode)
         {
-            Debug.LogError($"ShopManager: Erro ao processar buffs do WebGL: {e.Message}");
+            Debug.Log("ShopManager: Sistema de dados persistentes criado");
+        }
+    }
+    
+    private void OnDestroy()
+    {
+        // Remove o listener quando o objeto é destruído
+        if (WebGLCommunicator.Instance != null)
+        {
+            WebGLCommunicator.Instance.OnBuffsReceived -= OnWebGLBuffsReceived;
+            WebGLCommunicator.Instance.OnShopOptionsReceived -= OnShopOptionsReceived;
+        }
+        
+        // Limpa a instância se esta for a instância principal
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+    }
+    
+    /// <summary>
+    /// Reinicia o estado da loja para permitir que ela seja aberta novamente
+    /// Deve ser chamado quando o jogador perde e a wave é reiniciada
+    /// </summary>
+    public void ResetShopState()
+    {
+        // Garante que a loja esteja fechada
+        if (shopPanel != null)
+        {
+            shopPanel.SetActive(false);
+        }
+        
+        // Reinicia o estado interno
+        isShopOpen = false;
+        
+        // Restaura o tempo normal do jogo (importante para o caso da loja estar aberta durante a derrota)
+        Time.timeScale = 1f;
+        
+        if (debugMode)
+        {
+            Debug.Log("ShopManager: Estado da loja reiniciado");
+        }
+    }
+    
+    /// <summary>
+    /// Limpa o cache de opções da loja (útil para testes ou redefinir o jogo)
+    /// </summary>
+    public void ClearShopOptionsCache()
+    {
+        // Limpa o cache do sistema persistente
+        if (ShopPersistentData.Instance != null)
+        {
+            ShopPersistentData.Instance.ClearCache();
+        }
+        
+        // Limpa as opções locais também
+        availableOptions = null;
+        
+        if (debugMode)
+        {
+            Debug.Log("ShopManager: Cache de opções da loja limpo");
         }
     }
     
@@ -515,6 +685,16 @@ public class ShopManager : MonoBehaviour
         {
             availableOptions = newOptions;
             
+            // Salva as opções no sistema persistente
+            if (ShopPersistentData.Instance != null)
+            {
+                ShopPersistentData.Instance.SaveShopOptions(newOptions);
+            }
+            else if (debugMode)
+            {
+                Debug.LogWarning("ShopManager: Sistema persistente não encontrado para salvar opções");
+            }
+            
             if (debugMode)
             {
                 Debug.Log($"ShopManager: Opções da loja atualizadas. {newOptions.Length} opções disponíveis.");
@@ -522,14 +702,51 @@ public class ShopManager : MonoBehaviour
         }
     }
     
-    private void OnDestroy()
+    /// <summary>
+    /// Callback para quando buffs são recebidos do WebGL
+    /// </summary>
+    private void OnWebGLBuffsReceived(string buffData)
     {
-        // Remove o listener quando o objeto é destruído
-        if (WebGLCommunicator.Instance != null)
+        if (debugMode)
         {
-            WebGLCommunicator.Instance.OnBuffsReceived -= OnWebGLBuffsReceived;
+            Debug.Log($"ShopManager: Buffs recebidos do WebGL: {buffData}");
+        }
+        
+        // Aqui você pode implementar a lógica para processar os buffs recebidos
+        // Por exemplo, aplicar buffs diretamente ao jogador ou atualizar a UI
+        // TODO: Implementar processamento de buffs conforme necessário
+    }
+    
+    /// <summary>
+    /// Callback para quando opções da loja são recebidas do WebGL
+    /// </summary>
+    private void OnShopOptionsReceived(string optionsData)
+    {
+        if (debugMode)
+        {
+            Debug.Log($"ShopManager: Opções da loja recebidas do WebGL: {optionsData}");
+        }
+        
+        try
+        {
+            // Tenta deserializar as opções recebidas
+            // Aqui você pode implementar a lógica para converter o JSON em ShopOption[]
+            // e atualizar as opções disponíveis na loja
+            
+            // Por enquanto, apenas registra que as opções foram recebidas
+            // TODO: Implementar deserialização e atualização das opções conforme necessário
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"ShopManager: Erro ao processar opções da loja do WebGL: {e.Message}");
         }
     }
+    
+    // Propriedades públicas
+    /// <summary>
+    /// Indica se a loja está atualmente aberta
+    /// </summary>
+    public bool IsShopOpen => isShopOpen;
 }
 
 /// <summary>

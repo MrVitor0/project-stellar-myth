@@ -287,6 +287,28 @@ public class GameController : MonoBehaviour
     
     public void RestartGame()
     {
+        // Reseta o estado do ShopManager antes de recarregar a cena
+        if (ShopManager.Instance != null)
+        {
+            ShopManager.Instance.OnGameRestart();
+            
+            if (debugMode)
+            {
+                Debug.Log("GameController: Estado do ShopManager resetado");
+            }
+        }
+        
+        // Reseta também o sistema persistente
+        if (ShopPersistentData.Instance != null)
+        {
+            ShopPersistentData.Instance.ResetShopState();
+            
+            if (debugMode)
+            {
+                Debug.Log("GameController: Sistema persistente da loja resetado");
+            }
+        }
+        
         Time.timeScale = 1f;
         UnityEngine.SceneManagement.SceneManager.LoadScene(
             UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);

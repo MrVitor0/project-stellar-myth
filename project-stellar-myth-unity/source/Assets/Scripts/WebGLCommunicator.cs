@@ -349,23 +349,46 @@ public class WebGLCommunicator : MonoBehaviour
     /// <param name="jsonData">Dados JSON das opções da loja</param>
     private void SendShopOptionsToShopManager(string jsonData)
     {
-        // Procura pelo ShopManager na cena
-        ShopManager shopManager = FindObjectOfType<ShopManager>();
-        
-        if (shopManager != null)
+        try
         {
-            if (debugMode)
+            // Converte o JSON para array de ShopOption
+            ShopOption[] shopOptions = ParseJsonToShopOptions(jsonData);
+            
+            if (shopOptions == null || shopOptions.Length == 0)
             {
-                Debug.Log("WebGLCommunicator: Enviando opções da loja para o ShopManager");
+                Debug.LogWarning("WebGLCommunicator: Nenhuma opção válida encontrada para enviar ao ShopManager");
+                return;
             }
             
-            try
+            // Verifica se existe uma instância do ShopManager (via singleton)
+            ShopManager shopManager = ShopManager.Instance;
+            
+            if (shopManager != null)
             {
-                // Converte o JSON para array de ShopOption
-                ShopOption[] shopOptions = ParseJsonToShopOptions(jsonData);
-                
-                if (shopOptions != null && shopOptions.Length > 0)
+                if (debugMode)
                 {
+                    Debug.Log("WebGLCommunicator: Enviando opções da loja para o ShopManager via singleton");
+                }
+                
+                shopManager.UpdateShopOptions(shopOptions);
+                
+                if (debugMode)
+                {
+                    Debug.Log($"WebGLCommunicator: {shopOptions.Length} opções enviadas para o ShopManager");
+                }
+            }
+            else
+            {
+                // Procura pelo ShopManager na cena como fallback
+                shopManager = FindObjectOfType<ShopManager>();
+                
+                if (shopManager != null)
+                {
+                    if (debugMode)
+                    {
+                        Debug.Log("WebGLCommunicator: Enviando opções da loja para o ShopManager encontrado na cena");
+                    }
+                    
                     shopManager.UpdateShopOptions(shopOptions);
                     
                     if (debugMode)
@@ -375,20 +398,16 @@ public class WebGLCommunicator : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning("WebGLCommunicator: Nenhuma opção válida encontrada para enviar ao ShopManager");
+                    if (debugMode)
+                    {
+                        Debug.LogWarning("WebGLCommunicator: ShopManager não encontrado na cena");
+                    }
                 }
             }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"WebGLCommunicator: Erro ao enviar opções para o ShopManager: {e.Message}");
-            }
         }
-        else
+        catch (System.Exception e)
         {
-            if (debugMode)
-            {
-                Debug.LogWarning("WebGLCommunicator: ShopManager não encontrado na cena");
-            }
+            Debug.LogError($"WebGLCommunicator: Erro ao enviar opções para o ShopManager: {e.Message}");
         }
     }
     
