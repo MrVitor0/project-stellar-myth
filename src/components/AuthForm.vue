@@ -161,7 +161,7 @@
       <!-- Registration Form -->
       <div v-if="activeTab === 'register'" class="space-y-4">
         <h3 class="text-xl font-bold text-brazil-yellow glow-text mb-6">
-          Join the forge/myth
+          Join us!
         </h3>
 
         <!-- Mensagens de erro/sucesso -->
