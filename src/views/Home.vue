@@ -49,14 +49,8 @@
           </div>
 
           <!-- Right Column - Blessing Cards Showcase -->
-          <div
-            class="order-1 lg:order-2 flex items-center justify-center h-[500px]"
-          >
-            <BlessingCardsStack
-              :blessings="recentBlessings"
-              @create-blessing="handleCreateBlessing"
-              class="w-full h-full"
-            />
+          <div class="order-1 lg:order-2">
+            <BlessingCardsStack :blessings="customCharacters" />
           </div>
         </div>
 
@@ -471,6 +465,26 @@ export default {
       shopService: shopService, // Adiciona referência ao serviço da loja
       playerLevel: 1, // Nível do jogador para selecionar opções da loja
       lastShopOptionIds: [], // IDs das últimas opções da loja para evitar repetição
+      customCharacters: [
+        // Exemplos de personagens personalizados
+        {
+          id: 1,
+          name: "Archer of Light",
+          image: "https://via.placeholder.com/150x200?text=Archer+of+Light",
+        },
+        {
+          id: 2,
+          name: "Moreira, The Immortal Trickster",
+          image: "@/assets/images/moreira.png",
+          description: "A charismatic and cunning rogue",
+        },
+        {
+          id: 3,
+          name: "Sepé, the Southern Sentinel",
+          image: "https://via.placeholder.com/150x200?text=Mystic+Mage",
+          description: "A stoic and powerful Guarani warrior",
+        },
+      ],
       heroData: {
         title: {
           prefix: "Forge the Myth. Shape the Game.",

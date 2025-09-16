@@ -8,7 +8,7 @@
     >
       <!-- Card Left -->
       <div
-        class="blessing-card card-left absolute top-1/2 left-1/2 -translate-y-1/2 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-brazil-green/20 backdrop-blur-sm transform -rotate-12 -translate-x-[calc(50%+80px)] transition-all duration-300 group"
+        class="blessing-card card-left absolute top-1/3 left-1/2 -translate-y-1/2 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-brazil-green/20 backdrop-blur-sm transform -rotate-12 -translate-x-[calc(50%+80px)] transition-all duration-300 group"
         v-if="blessings[0]"
       >
         <div class="p-6 h-full">
@@ -16,12 +16,31 @@
           <div
             class="absolute inset-0 bg-gradient-to-br from-brazil-green/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           ></div>
+
+          <img
+            v-if="blessings[2].image"
+            src="@/assets/images/sepe.png"
+            alt="Blessing Image"
+            class="mx-auto h-64 w-64 mb-4 rounded-lg"
+          />
+          <!-- Content -->
+          <div class="text-center relative z-10">
+            <h3 class="text-xl font-bold text-mist-white mb-2">
+              {{ blessings[2].name || "Bênção Dourada" }}
+            </h3>
+
+            <p class="text-sm text-mid-gray line-clamp-2 mb-3">
+              {{
+                blessings[2].description || "A bênção mais poderosa da coleção"
+              }}
+            </p>
+          </div>
         </div>
       </div>
 
       <!-- Card Center (Top) -->
       <div
-        class="blessing-card card-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl border border-brazil-yellow/30 backdrop-blur-sm transform z-10 cursor-pointer"
+        class="blessing-card card-center absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl border border-brazil-yellow/30 backdrop-blur-sm transform z-10 cursor-pointer"
         v-if="blessings[1]"
         @click="$emit('create-blessing')"
       >
@@ -35,45 +54,26 @@
           <div
             class="absolute -top-2 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-brazil-yellow text-dark-night text-xs font-bold rounded-full shadow-lg"
           >
-            DESTAQUE
+            NEW
           </div>
 
-          <!-- Icon -->
-          <div class="flex justify-center mb-4 mt-2">
-            <div
-              class="w-18 h-18 bg-gradient-to-br from-brazil-yellow to-amber-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300"
-            >
-              <svg
-                class="w-10 h-10 text-dark-night"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M5,16L3,5H1V3H4L6,14H18.5L19.5,11H7.1L7.4,9H21.7L19.7,16H5M6,20A2,2 0 0,0 8,22A2,2 0 0,0 10,20A2,2 0 0,0 8,18A2,2 0 0,0 6,20M16,20A2,2 0 0,0 18,22A2,2 0 0,0 20,20A2,2 0 0,0 18,18A2,2 0 0,0 16,20Z"
-                />
-              </svg>
-            </div>
-          </div>
-
+          <img
+            v-if="blessings[1].image"
+            src="@/assets/images/moreira.png"
+            alt="Blessing Image"
+            class="mx-auto h-64 w-64 mb-4 rounded-lg"
+          />
           <!-- Content -->
           <div class="text-center relative z-10">
             <h3 class="text-xl font-bold text-mist-white mb-2">
               {{ blessings[1].name || "Bênção Dourada" }}
             </h3>
+
             <p class="text-sm text-mid-gray line-clamp-2 mb-3">
               {{
                 blessings[1].description || "A bênção mais poderosa da coleção"
               }}
             </p>
-            <div
-              class="text-brazil-yellow font-bold flex items-center justify-center"
-            >
-              <span
-                class="w-2 h-2 bg-brazil-yellow rounded-full mr-2 animate-pulse"
-              ></span>
-              {{ blessings[1].power || "300" }}
-              Poder
-            </div>
           </div>
         </div>
       </div>
@@ -88,6 +88,25 @@
           <div
             class="absolute inset-0 bg-gradient-to-br from-mystic-cyan/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           ></div>
+
+          <img
+            v-if="blessings[2].image"
+            src="@/assets/images/sepe.png"
+            alt="Blessing Image"
+            class="mx-auto h-64 w-64 mb-4 rounded-lg"
+          />
+          <!-- Content -->
+          <div class="text-center relative z-10">
+            <h3 class="text-xl font-bold text-mist-white mb-2">
+              {{ blessings[2].name || "Bênção Dourada" }}
+            </h3>
+
+            <p class="text-sm text-mid-gray line-clamp-2 mb-3">
+              {{
+                blessings[2].description || "A bênção mais poderosa da coleção"
+              }}
+            </p>
+          </div>
         </div>
       </div>
     </div>
