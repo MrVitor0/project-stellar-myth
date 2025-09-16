@@ -743,7 +743,7 @@ export default {
             if (!keypair) {
               throw new Error("Wallet not connected");
             }
-            result = await SorobanService.createOption(keypair, optionData);
+            result = await SorobanService.createOption(optionData, keypair);
           }
 
           console.log("✅ Contract response:", result);

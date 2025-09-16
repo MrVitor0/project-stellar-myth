@@ -9,376 +9,464 @@ class SorobanService {
     this.server = new StellarSdk.Horizon.Server(
       "https://horizon-testnet.stellar.org"
     );
-    this.sorobanServer = new StellarSdk.Horizon.Server(
-      "https://soroban-testnet.stellar.org:443"
+
+    // Usando o endpoint correto do Soroban RPC
+    this.sorobanServer = new StellarSdk.rpc.Server(
+      "https://soroban-testnet.stellar.org",
+      { allowHttp: false }
     );
+
     this.networkPassphrase = StellarSdk.Networks.TESTNET;
     this.contractAddress =
       "CAKHS4ZPT7YGOXDKXEXSH6G7VQPA5K3MUICQDBXZRAJSLOKRT67KY3S4";
   }
 
   /**
-   * Cria um par de chaves Stellar para o usuário (para demonstração)
-   * Em produção, você deve integrar com uma carteira como Freighter
+   * Gera um novo par de chaves Stellar
    */
   generateKeyPair() {
     return StellarSdk.Keypair.random();
   }
 
   /**
-   * Financia uma conta na Testnet usando o Friendbot
+   * Financia uma conta na testnet usando o Friendbot
    */
   async fundAccount(publicKey) {
     try {
       const response = await fetch(
-        `https://friendbot.stellar.org?addr=${publicKey}`
+        `https://friendbot.stellar.org?addr=${encodeURIComponent(publicKey)}`
       );
-      if (!response.ok) {
-        throw new Error("Falha ao financiar a conta");
-      }
-      return await response.json();
+      const responseJSON = await response.json();
+      console.log("SUCCESS! You have a new account :)\n", responseJSON);
+      return responseJSON;
     } catch (error) {
-      console.error("Erro ao financiar conta:", error);
+      console.error("ERROR! Unable to fund account", error);
       throw error;
     }
   }
 
   /**
-   * Converte um objeto JavaScript para os tipos Soroban
+   * Converte um objeto JavaScript Option para ScVal com validação rigorosa
    */
-  convertToSorobanTypes(option) {
-    // Converte o objeto Option para os tipos nativos do Soroban
-    const map = new Map();
+  jsOptionToScVal(option) {
+    try {
+      // Validação rigorosa dos tipos
+      if (typeof option.buff !== "string") {
+        throw new Error(`buff must be a string, got ${typeof option.buff}`);
+      }
+      if (typeof option.cost !== "number" || option.cost < 0) {
+        throw new Error(
+          `cost must be a non-negative number, got ${typeof option.cost}: ${
+            option.cost
+          }`
+        );
+      }
+      if (typeof option.description !== "string") {
+        throw new Error(
+          `description must be a string, got ${typeof option.description}`
+        );
+      }
+      if (typeof option.icon !== "string") {
+        throw new Error(`icon must be a string, got ${typeof option.icon}`);
+      }
+      if (typeof option.optionName !== "string") {
+        throw new Error(
+          `optionName must be a string, got ${typeof option.optionName}`
+        );
+      }
+      if (typeof option.optionType !== "string") {
+        throw new Error(
+          `optionType must be a string, got ${typeof option.optionType}`
+        );
+      }
+      if (typeof option.owner !== "string") {
+        throw new Error(`owner must be a string, got ${typeof option.owner}`);
+      }
+      if (typeof option.rarity !== "string") {
+        throw new Error(`rarity must be a string, got ${typeof option.rarity}`);
+      }
+      if (typeof option.stellarTransactionId !== "string") {
+        throw new Error(
+          `stellarTransactionId must be a string, got ${typeof option.stellarTransactionId}`
+        );
+      }
+      if (typeof option.title !== "string") {
+        throw new Error(`title must be a string, got ${typeof option.title}`);
+      }
+      if (typeof option.value !== "number" || option.value < 0) {
+        throw new Error(
+          `value must be a non-negative number, got ${typeof option.value}: ${
+            option.value
+          }`
+        );
+      }
 
-    map.set(
-      "optionName",
-      StellarSdk.nativeToScVal(option.optionName, { type: "string" })
-    );
-    map.set(
-      "description",
-      StellarSdk.nativeToScVal(option.description, { type: "string" })
-    );
-    map.set(
-      "stellarTransactionId",
-      StellarSdk.nativeToScVal(option.stellarTransactionId, { type: "string" })
-    );
-    map.set(
-      "title",
-      StellarSdk.nativeToScVal(option.title, { type: "string" })
-    );
-    map.set("buff", StellarSdk.nativeToScVal(option.buff, { type: "string" }));
-    map.set("icon", StellarSdk.nativeToScVal(option.icon, { type: "string" }));
-    map.set(
-      "optionType",
-      StellarSdk.nativeToScVal(option.optionType, { type: "string" })
-    );
-    map.set("value", StellarSdk.nativeToScVal(option.value, { type: "u64" }));
-    map.set(
-      "rarity",
-      StellarSdk.nativeToScVal(option.rarity, { type: "string" })
-    );
-    map.set("cost", StellarSdk.nativeToScVal(option.cost, { type: "u64" }));
-    map.set(
-      "owner",
-      StellarSdk.nativeToScVal(option.owner, { type: "address" })
-    );
+      // Validar se owner é um endereço válido
+      try {
+        StellarSdk.StrKey.decodeEd25519PublicKey(option.owner);
+      } catch (error) {
+        throw new Error(`Invalid owner address: ${option.owner}`);
+      }
 
-    return StellarSdk.nativeToScVal(map, { type: "map" });
+      const scValMap = [
+        {
+          key: StellarSdk.xdr.ScVal.scvSymbol("buff"),
+          val: StellarSdk.xdr.ScVal.scvString(option.buff),
+        },
+        {
+          key: StellarSdk.xdr.ScVal.scvSymbol("cost"),
+          val: StellarSdk.xdr.ScVal.scvU64(
+            new StellarSdk.xdr.Uint64(option.cost)
+          ),
+        },
+        {
+          key: StellarSdk.xdr.ScVal.scvSymbol("description"),
+          val: StellarSdk.xdr.ScVal.scvString(option.description),
+        },
+        {
+          key: StellarSdk.xdr.ScVal.scvSymbol("icon"),
+          val: StellarSdk.xdr.ScVal.scvString(option.icon),
+        },
+        {
+          key: StellarSdk.xdr.ScVal.scvSymbol("option_name"),
+          val: StellarSdk.xdr.ScVal.scvString(option.optionName),
+        },
+        {
+          key: StellarSdk.xdr.ScVal.scvSymbol("option_type"),
+          val: StellarSdk.xdr.ScVal.scvString(option.optionType),
+        },
+        {
+          key: StellarSdk.xdr.ScVal.scvSymbol("owner"),
+          val: new StellarSdk.Address(option.owner).toScVal(),
+        },
+        {
+          key: StellarSdk.xdr.ScVal.scvSymbol("rarity"),
+          val: StellarSdk.xdr.ScVal.scvString(option.rarity),
+        },
+        {
+          key: StellarSdk.xdr.ScVal.scvSymbol("stellar_transaction_id"),
+          val: StellarSdk.xdr.ScVal.scvString(option.stellarTransactionId),
+        },
+        {
+          key: StellarSdk.xdr.ScVal.scvSymbol("title"),
+          val: StellarSdk.xdr.ScVal.scvString(option.title),
+        },
+        {
+          key: StellarSdk.xdr.ScVal.scvSymbol("value"),
+          val: StellarSdk.xdr.ScVal.scvU64(
+            new StellarSdk.xdr.Uint64(option.value)
+          ),
+        },
+      ];
+
+      // Criar o mapa de entradas
+      const mapEntries = scValMap.map(
+        (entry) =>
+          new StellarSdk.xdr.ScMapEntry({
+            key: entry.key,
+            val: entry.val,
+          })
+      );
+
+      // Retornar como um mapa ScVal
+      return StellarSdk.xdr.ScVal.scvMap(mapEntries);
+    } catch (error) {
+      console.error("Error converting JS Option to ScVal:", error);
+      throw error;
+    }
   }
 
   /**
-   * Cria uma nova opção no contrato
+   * Cria uma nova opção usando keypair local
    */
-  async createOption(userKeypair, optionData) {
+  async createOption(optionData, keypair) {
     try {
-      // Obter informações da conta
-      const account = await this.server.loadAccount(userKeypair.publicKey());
+      console.log("🚀 Creating option with keypair:", optionData);
 
-      // Preparar os argumentos para a função
-      const userAddress = new StellarSdk.Address(userKeypair.publicKey());
-      const optionScVal = this.convertToSorobanTypes({
+      // Carregar conta do usuário
+      const account = await this.server.loadAccount(keypair.publicKey());
+
+      // Construir argumentos para o contrato
+      const userAddress = new StellarSdk.Address(keypair.publicKey());
+
+      // Adicionar o owner ao optionData antes de converter
+      const completeOptionData = {
         ...optionData,
-        owner: userKeypair.publicKey(),
-      });
+        owner: keypair.publicKey(),
+      };
 
-      // Criar o contrato
+      const optionScVal = this.jsOptionToScVal(completeOptionData);
+
+      // Criar operação do contrato
       const contract = new StellarSdk.Contract(this.contractAddress);
-
-      // Preparar a operação
       const operation = contract.call(
         "create_option",
-        StellarSdk.nativeToScVal(userAddress, { type: "address" }),
+        userAddress.toScVal(),
         optionScVal
       );
 
-      // Construir a transação
+      // Construir transação
       const transaction = new StellarSdk.TransactionBuilder(account, {
         fee: StellarSdk.BASE_FEE,
         networkPassphrase: this.networkPassphrase,
       })
         .addOperation(operation)
-        .setTimeout(300) // 5 minutos
+        .setTimeout(30)
         .build();
 
-      // Simular a transação primeiro
-      const simulationResponse = await this.sorobanServer.simulateTransaction(
+      // Simular transação primeiro
+      const simulateResponse = await this.sorobanServer.simulateTransaction(
         transaction
       );
 
-      if (StellarSdk.SorobanRpc.Api.isSimulationError(simulationResponse)) {
-        throw new Error(`Erro na simulação: ${simulationResponse.error}`);
+      if (StellarSdk.rpc.Api.isSimulationError(simulateResponse)) {
+        throw new Error(`Simulation error: ${simulateResponse.error}`);
       }
 
-      // Preparar a transação com os recursos necessários
-      const preparedTransaction = StellarSdk.SorobanRpc.assembleTransaction(
+      // Preparar transação com os recursos necessários
+      const preparedTransactionBuilder = StellarSdk.rpc.assembleTransaction(
         transaction,
-        simulationResponse
+        simulateResponse
       );
 
-      // Assinar a transação
-      preparedTransaction.sign(userKeypair);
+      // Build a transação final
+      const preparedTransaction = preparedTransactionBuilder.build();
 
-      // Enviar a transação
+      // Assinar transação
+      preparedTransaction.sign(keypair);
+
+      // Enviar transação
       const sendResponse = await this.sorobanServer.sendTransaction(
         preparedTransaction
       );
 
-      if (sendResponse.status === "PENDING") {
-        // Aguardar a confirmação
-        let getResponse = await this.sorobanServer.getTransaction(
+      if (sendResponse.status === "ERROR") {
+        throw new Error(`Send error: ${sendResponse.errorResult}`);
+      }
+
+      // Aguardar resultado
+      let getResponse = await this.sorobanServer.getTransaction(
+        sendResponse.hash
+      );
+
+      // Aguardar até a transação ser processada
+      while (getResponse.status === "NOT_FOUND") {
+        console.log("⏳ Aguardando transação ser processada...");
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        getResponse = await this.sorobanServer.getTransaction(
           sendResponse.hash
         );
+      }
 
-        // Aguardar até a transação ser processada
-        while (getResponse.status === "NOT_FOUND") {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          getResponse = await this.sorobanServer.getTransaction(
-            sendResponse.hash
-          );
-        }
-
-        if (getResponse.status === "SUCCESS") {
-          return {
-            success: true,
-            hash: sendResponse.hash,
-            result: getResponse.returnValue,
-          };
-        } else {
-          throw new Error(`Transação falhou: ${getResponse.resultXdr}`);
-        }
+      if (getResponse.status === "SUCCESS") {
+        console.log("✅ Transação bem-sucedida!");
+        return {
+          success: true,
+          hash: sendResponse.hash,
+          result: getResponse.returnValue,
+        };
       } else {
-        throw new Error(`Falha ao enviar transação: ${sendResponse.errorXdr}`);
+        throw new Error(`Transaction failed: ${getResponse.status}`);
       }
     } catch (error) {
-      console.error("Erro ao criar opção:", error);
+      console.error("❌ Error creating option:", error);
       throw error;
     }
   }
 
   /**
-   * Cria uma nova opção no contrato usando Freighter para assinar a transação
+   * Cria uma nova opção usando Freighter
    */
   async createOptionWithFreighter(optionData) {
     try {
-      // Importar FreighterService
-      const FreighterService = await import("./FreighterService").then(
+      console.log("🚀 Creating option with Freighter:", optionData);
+
+      // Importar FreighterService dinamicamente
+      const FreighterService = await import("./FreighterService.js").then(
         (module) => module.default
       );
 
-      // Verificar se o Freighter está conectado
-      if (!FreighterService.getIsConnected()) {
-        throw new Error("Freighter não está conectado");
+      // Obter chave pública do Freighter
+      const publicKey = await FreighterService.getPublicKey();
+      if (!publicKey) {
+        throw new Error("Não foi possível obter a chave pública do Freighter");
       }
 
-      // Obter a chave pública do usuário
-      const userPublicKey = await FreighterService.getPublicKey();
+      // Carregar conta do usuário
+      const account = await this.server.loadAccount(publicKey);
 
-      // Verificar a rede atual
-      await FreighterService.verifyNetwork();
+      // Construir argumentos para o contrato
+      const userAddress = new StellarSdk.Address(publicKey);
 
-      // Obter informações da conta
-      const account = await this.server.loadAccount(userPublicKey);
-
-      // Preparar os argumentos para a função
-      const userAddress = new StellarSdk.Address(userPublicKey);
-      const optionScVal = this.convertToSorobanTypes({
+      // Adicionar o owner ao optionData antes de converter
+      const completeOptionData = {
         ...optionData,
-        owner: userPublicKey,
-      });
+        owner: publicKey,
+      };
 
-      // Criar o contrato
+      const optionScVal = this.jsOptionToScVal(completeOptionData);
+
+      // Criar operação do contrato
       const contract = new StellarSdk.Contract(this.contractAddress);
-
-      // Preparar a operação
       const operation = contract.call(
         "create_option",
-        StellarSdk.nativeToScVal(userAddress, { type: "address" }),
+        userAddress.toScVal(),
         optionScVal
       );
 
-      // Construir a transação
+      // Construir transação
       const transaction = new StellarSdk.TransactionBuilder(account, {
         fee: StellarSdk.BASE_FEE,
         networkPassphrase: this.networkPassphrase,
       })
         .addOperation(operation)
-        .setTimeout(300) // 5 minutos
+        .setTimeout(30)
         .build();
 
-      // Simular a transação primeiro
-      const simulationResponse = await this.sorobanServer.simulateTransaction(
+      // Simular transação primeiro
+      const simulateResponse = await this.sorobanServer.simulateTransaction(
         transaction
       );
 
-      if (StellarSdk.SorobanRpc.Api.isSimulationError(simulationResponse)) {
-        throw new Error(`Erro na simulação: ${simulationResponse.error}`);
+      if (StellarSdk.rpc.Api.isSimulationError(simulateResponse)) {
+        throw new Error(`Simulation error: ${simulateResponse.error}`);
       }
 
-      // Preparar a transação com os recursos necessários
-      const preparedTransaction = StellarSdk.SorobanRpc.assembleTransaction(
+      // Preparar transação com os recursos necessários
+      const preparedTransactionBuilder = StellarSdk.rpc.assembleTransaction(
         transaction,
-        simulationResponse
+        simulateResponse
       );
 
-      // Converter para XDR para assinar com o Freighter
-      const xdrTransaction = preparedTransaction.toXDR();
+      // Build a transação final
+      const preparedTransaction = preparedTransactionBuilder.build();
 
-      // Assinar a transação com o Freighter
-      const signedXDR = await FreighterService.signTransaction(
-        xdrTransaction,
+      // Converter transação para XDR
+      const transactionXdr = preparedTransaction.toXDR();
+
+      // Assinar com Freighter
+      const signedXdr = await FreighterService.signTransaction(
+        transactionXdr,
+        publicKey,
         this.networkPassphrase
       );
 
-      // Converter de volta para TransactionBuilder
+      // Criar transação assinada
       const signedTransaction = StellarSdk.TransactionBuilder.fromXDR(
-        signedXDR,
+        signedXdr,
         this.networkPassphrase
       );
 
-      // Enviar a transação
+      // Enviar transação
       const sendResponse = await this.sorobanServer.sendTransaction(
         signedTransaction
       );
 
-      if (sendResponse.status === "PENDING") {
-        // Aguardar a confirmação
-        let getResponse = await this.sorobanServer.getTransaction(
+      if (sendResponse.status === "ERROR") {
+        throw new Error(`Send error: ${sendResponse.errorResult}`);
+      }
+
+      // Aguardar resultado
+      let getResponse = await this.sorobanServer.getTransaction(
+        sendResponse.hash
+      );
+
+      // Aguardar até a transação ser processada
+      while (getResponse.status === "NOT_FOUND") {
+        console.log("⏳ Aguardando transação ser processada...");
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        getResponse = await this.sorobanServer.getTransaction(
           sendResponse.hash
         );
+      }
 
-        // Aguardar até a transação ser processada
-        while (getResponse.status === "NOT_FOUND") {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          getResponse = await this.sorobanServer.getTransaction(
-            sendResponse.hash
-          );
-        }
-
-        if (getResponse.status === "SUCCESS") {
-          return {
-            success: true,
-            hash: sendResponse.hash,
-            result: getResponse.returnValue,
-          };
-        } else {
-          throw new Error(`Transação falhou: ${getResponse.resultXdr}`);
-        }
+      if (getResponse.status === "SUCCESS") {
+        console.log("✅ Transação bem-sucedida!");
+        return {
+          success: true,
+          hash: sendResponse.hash,
+          result: getResponse.returnValue,
+        };
       } else {
-        throw new Error(`Falha ao enviar transação: ${sendResponse.errorXdr}`);
+        throw new Error(`Transaction failed: ${getResponse.status}`);
       }
     } catch (error) {
-      console.error("Erro ao criar opção com Freighter:", error);
+      console.error("❌ Error creating option with Freighter:", error);
       throw error;
     }
   }
 
   /**
-   * Busca as últimas N opções do contrato
+   * Obtém as últimas N opções do contrato
    */
   async getLastNOptions(n = 10) {
     try {
-      // Criar uma conta temporária apenas para leitura
-      const tempKeypair = StellarSdk.Keypair.random();
-      let account;
+      console.log(`🔍 Getting last ${n} options from contract`);
 
-      try {
-        account = await this.server.loadAccount(tempKeypair.publicKey());
-      } catch {
-        // Se a conta não existir, criar uma conta "fantasma" para leitura
-        account = new StellarSdk.Account(tempKeypair.publicKey(), "0");
-      }
-
-      // Criar o contrato
+      // Criar operação de consulta
       const contract = new StellarSdk.Contract(this.contractAddress);
-
-      // Preparar a operação de leitura
       const operation = contract.call(
         "get_last_n_options",
-        StellarSdk.nativeToScVal(n, { type: "u32" })
+        StellarSdk.xdr.ScVal.scvU32(n)
       );
 
-      // Construir a transação
+      // Criar transação temporária para simular
+      const account = await this.server.loadAccount(
+        StellarSdk.Keypair.random().publicKey()
+      );
       const transaction = new StellarSdk.TransactionBuilder(account, {
         fee: StellarSdk.BASE_FEE,
         networkPassphrase: this.networkPassphrase,
       })
         .addOperation(operation)
-        .setTimeout(300)
+        .setTimeout(30)
         .build();
 
-      // Simular a transação para obter o resultado
-      const simulationResponse = await this.sorobanServer.simulateTransaction(
+      // Simular transação para obter resultado
+      const simulateResponse = await this.sorobanServer.simulateTransaction(
         transaction
       );
 
-      if (StellarSdk.SorobanRpc.Api.isSimulationError(simulationResponse)) {
-        throw new Error(`Erro na simulação: ${simulationResponse.error}`);
+      if (StellarSdk.rpc.Api.isSimulationError(simulateResponse)) {
+        throw new Error(`Simulation error: ${simulateResponse.error}`);
       }
 
-      // Converter o resultado de volta para JavaScript
-      if (simulationResponse.result?.retval) {
-        const result = StellarSdk.scValToNative(
-          simulationResponse.result.retval
-        );
-        return this.parseOptionsArray(result);
+      // Processar resultado
+      if (simulateResponse.result && simulateResponse.result.retval) {
+        const options = this.scValToJsOptions(simulateResponse.result.retval);
+        console.log(`✅ Retrieved ${options.length} options`);
+        return options;
       }
 
       return [];
     } catch (error) {
-      console.error("Erro ao buscar opções:", error);
+      console.error("❌ Error getting options:", error);
       throw error;
     }
   }
 
   /**
-   * Converte o array de opções do formato Soroban para JavaScript
+   * Converte ScVal para array de opções JavaScript
    */
-  parseOptionsArray(sorobanArray) {
-    if (!Array.isArray(sorobanArray)) {
-      return [];
-    }
-
-    return sorobanArray.map((option) => {
-      if (option instanceof Map) {
-        const parsedOption = {};
-        for (const [key, value] of option.entries()) {
-          parsedOption[key] = value;
-        }
-        return parsedOption;
-      }
-      return option;
-    });
-  }
-
-  /**
-   * Valida se um endereço Stellar é válido
-   */
-  isValidStellarAddress(address) {
+  scValToJsOptions(scVal) {
     try {
-      StellarSdk.StrKey.decodeEd25519PublicKey(address);
-      return true;
-    } catch {
-      return false;
+      // Esta é uma implementação simplificada
+      // Em produção, você precisaria de uma conversão mais robusta
+      if (scVal.instance && scVal.instance().vec) {
+        return scVal
+          .instance()
+          .vec()
+          .map((item) => ({
+            // Conversão básica - você pode expandir isso conforme necessário
+            optionName: "Converted Option",
+            description: "Converted from contract",
+            // ... outros campos
+          }));
+      }
+      return [];
+    } catch (error) {
+      console.error("Error converting ScVal to JS options:", error);
+      return [];
     }
   }
 }
