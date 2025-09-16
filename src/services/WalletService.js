@@ -71,51 +71,6 @@ class WalletService {
   }
 
   /**
-   * Conecta usando o Freighter
-   */
-  async connectWithFreighter() {
-    try {
-      const freighterService = await import("./FreighterService").then(
-        (module) => module.default
-      );
-
-      // Verificar explicitamente se o Freighter está disponível
-      const isAvailable = await freighterService.checkFreighterAvailability();
-      if (!isAvailable) {
-        throw new Error(
-          "Freighter não está instalado ou disponível no navegador"
-        );
-      }
-
-      const result = await freighterService.connectWallet();
-
-      if (result && result.publicKey) {
-        // Salvar no localStorage
-        localStorage.setItem(
-          this.storageKey,
-          JSON.stringify({
-            publicKey: result.publicKey,
-            type: "freighter",
-          })
-        );
-
-        this.isConnected = true;
-        this.walletType = "freighter";
-
-        return {
-          publicKey: result.publicKey,
-          type: "freighter",
-        };
-      } else {
-        throw new Error("Falha ao conectar com Freighter");
-      }
-    } catch (error) {
-      console.error("Erro ao conectar com Freighter:", error);
-      throw error;
-    }
-  }
-
-  /**
    * Carrega o par de chaves ou conexão Freighter do localStorage
    */
   loadSavedWallet() {
@@ -123,12 +78,6 @@ class WalletService {
       const saved = localStorage.getItem(this.storageKey);
       if (saved) {
         const data = JSON.parse(saved);
-
-        // Verificar se é uma conexão Freighter
-        if (data.type === "freighter") {
-          // Verificar se o Freighter ainda está conectado
-          return this.loadFreighterWallet();
-        }
 
         // Se não, assumir que é um keypair normal
         if (data.secret) {
@@ -146,32 +95,6 @@ class WalletService {
       return null;
     } catch (error) {
       console.error("Erro ao carregar carteira salva:", error);
-      return null;
-    }
-  }
-
-  /**
-   * Carrega uma carteira Freighter salva
-   */
-  async loadFreighterWallet() {
-    try {
-      const freighterService = await import("./FreighterService").then(
-        (module) => module.default
-      );
-      const connection = await freighterService.checkExistingConnection();
-
-      if (connection && connection.publicKey) {
-        this.isConnected = true;
-        this.walletType = "freighter";
-        return {
-          publicKey: connection.publicKey,
-          type: "freighter",
-        };
-      }
-
-      return null;
-    } catch (error) {
-      console.error("Erro ao carregar carteira Freighter:", error);
       return null;
     }
   }
@@ -198,13 +121,6 @@ class WalletService {
    */
   async disconnect() {
     try {
-      if (this.walletType === "freighter") {
-        const freighterService = await import("./FreighterService").then(
-          (module) => module.default
-        );
-        freighterService.disconnect();
-      }
-
       localStorage.removeItem(this.storageKey);
       this.currentKeypair = null;
       this.isConnected = false;
@@ -225,17 +141,6 @@ class WalletService {
    * Retorna a chave pública atual
    */
   async getCurrentPublicKey() {
-    if (this.walletType === "freighter") {
-      try {
-        const freighterService = await import("./FreighterService").then(
-          (module) => module.default
-        );
-        return freighterService.getPublicKey();
-      } catch (error) {
-        console.error("Erro ao obter chave pública do Freighter:", error);
-        return null;
-      }
-    }
     return this.currentKeypair ? this.currentKeypair.publicKey() : null;
   }
 
@@ -312,18 +217,6 @@ class WalletService {
         } catch (error) {
           console.error("Erro ao copiar chave pública:", error);
           return false;
-        }
-      }
-
-      // Se estamos usando Freighter mas não conseguimos obter a chave
-      if (this.walletType === "freighter") {
-        const freighterService = await import("./FreighterService").then(
-          (module) => module.default
-        );
-        const freighterKey = freighterService.currentPublicKey;
-        if (freighterKey) {
-          await navigator.clipboard.writeText(freighterKey);
-          return true;
         }
       }
 

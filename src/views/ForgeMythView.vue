@@ -80,10 +80,12 @@
                 <span class="font-medium">Carteira já conectada</span>
               </div>
               <p class="text-gray-300">
-                Sua carteira Stellar já está conectada e pronta para uso.
+                Sua carteira Stellar está conectada e pronta para uso. Verifique
+                os detalhes abaixo e quando estiver pronto, clique no botão para
+                continuar.
               </p>
               <BaseButton @click="nextStep" class="mt-4" variant="primary"
-                >Prosseguir para o próximo passo</BaseButton
+                >Continuar para criação do mito</BaseButton
               >
             </div>
 
@@ -913,12 +915,8 @@ export default {
       const walletType = WalletService.getWalletType();
       console.log("Wallet type:", walletType);
 
-      // Avançar automaticamente para o próximo passo quando a carteira for conectada
-      if (currentStep.value === 0) {
-        setTimeout(() => {
-          nextStep();
-        }, 1000); // Pequeno atraso para dar feedback visual ao usuário
-      }
+      // Não avança automaticamente para o próximo passo
+      // Assim o usuário pode verificar os detalhes da carteira antes de prosseguir
     };
 
     const onWalletDisconnected = () => {
@@ -939,8 +937,8 @@ export default {
       const savedWallet = await WalletService.loadSavedWallet();
       if (savedWallet) {
         isWalletConnected.value = true;
-        // Skip wallet connection step if already connected
-        currentStep.value = 1;
+        // Não avança automaticamente, mantém na etapa de conexão
+        // para que o usuário possa verificar a carteira conectada
       }
     });
 

@@ -22,28 +22,12 @@
 
         <p class="text-gray-400 text-sm mb-6">
           In order to interact with the Stellar Testnet, you need to connect a
-          wallet. You can either generate a new wallet or connect using an
-          existing secret key.
+          wallet. You can generate a temporary Stellar wallet instantly, use
+          Freighter extension, or connect with an existing secret key.
         </p>
       </div>
 
       <div class="space-y-3">
-        <!-- Freighter Connection Button (shown first if available) -->
-        <BaseButton
-          v-if="freighterStatus === 'available'"
-          @click="connectWithFreighter"
-          :loading="isConnectingFreighter"
-          variant="primary"
-          class="w-full"
-        >
-          <template #icon>
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </template>
-          Connect with Freighter
-        </BaseButton>
-
         <!-- Divider if Freighter is available -->
         <div v-if="freighterStatus === 'available'" class="relative">
           <div class="absolute inset-0 flex items-center">
@@ -51,7 +35,7 @@
           </div>
           <div class="relative flex justify-center text-sm">
             <span class="px-2 bg-gray-800 text-gray-400"
-              >or use local wallet</span
+              >or create instant wallet</span
             >
           </div>
         </div>
@@ -59,8 +43,12 @@
         <BaseButton
           @click="generateNewWallet"
           :loading="isGenerating"
-          :variant="freighterStatus === 'available' ? 'secondary' : 'primary'"
-          class="w-full"
+          variant="primary"
+          class="w-full py-3 mt-3 text-base font-semibold animate-pulse-slow"
+          style="
+            background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+          "
         >
           <template #icon>
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -71,7 +59,7 @@
               />
             </svg>
           </template>
-          Generate New Local Wallet
+          Generate Temporary Stellar Wallet
         </BaseButton>
 
         <div class="relative">
@@ -136,13 +124,6 @@
                 Wallet Connected
               </h3>
               <span
-                v-if="walletType === 'freighter'"
-                class="px-2 py-1 bg-green-600/20 text-green-300 text-xs rounded-full border border-green-600/30"
-              >
-                Freighter
-              </span>
-              <span
-                v-else
                 class="px-2 py-1 bg-blue-600/20 text-blue-300 text-xs rounded-full border border-blue-600/30"
               >
                 Local
@@ -293,7 +274,6 @@
 <script>
 import { ref, computed, onMounted } from "vue";
 import WalletService from "@/services/WalletService.js";
-import FreighterService from "@/services/FreighterService.js";
 import BaseButton from "@/components/BaseButton.vue";
 
 export default {
@@ -345,48 +325,6 @@ export default {
     // Usar ref para a chave pública formatada em vez de computed
     const formattedPublicKey = ref("");
 
-    // Verifica disponibilidade do Freighter
-    const checkFreighterAvailability = async () => {
-      try {
-        const available = await FreighterService.checkFreighterAvailability();
-        freighterStatus.value = available ? "available" : "not-installed";
-      } catch (error) {
-        console.log("Freighter não disponível:", error);
-        freighterStatus.value = "not-installed";
-      }
-    };
-
-    const connectWithFreighter = async () => {
-      isConnectingFreighter.value = true;
-      secretKeyError.value = "";
-
-      try {
-        // Verificar novamente se o Freighter está disponível antes de tentar conectar
-        const isAvailable = await FreighterService.checkFreighterAvailability();
-        if (!isAvailable) {
-          throw new Error(
-            "Freighter não está instalado ou não está disponível no navegador"
-          );
-        }
-
-        const wallet = await WalletService.connectWithFreighter();
-        isConnected.value = true;
-        walletType.value = wallet.type;
-        await updatePublicKey();
-        await refreshBalance();
-        emit("wallet-connected", wallet.publicKey);
-      } catch (error) {
-        console.error("Erro ao conectar Freighter:", error);
-        secretKeyError.value =
-          error.message || "Erro ao conectar com Freighter.";
-
-        // Atualizar o status do Freighter para refletir que não está disponível
-        freighterStatus.value = "not-installed";
-      } finally {
-        isConnectingFreighter.value = false;
-      }
-    };
-
     const generateNewWallet = async () => {
       isGenerating.value = true;
       secretKeyError.value = "";
@@ -399,8 +337,7 @@ export default {
         await refreshBalance();
         emit("wallet-connected", wallet.publicKey);
       } catch (error) {
-        console.error("Erro ao gerar carteira:", error);
-        secretKeyError.value = "Erro ao gerar carteira. Tente novamente.";
+        secretKeyError.value = "Error generating wallet. Please try again.";
       } finally {
         isGenerating.value = false;
       }
@@ -423,8 +360,7 @@ export default {
         await refreshBalance();
         emit("wallet-connected", wallet.publicKey);
       } catch (error) {
-        console.error("Erro ao conectar carteira:", error);
-        secretKeyError.value = "Chave secreta inválida ou erro de conexão.";
+        secretKeyError.value = "Invalid secret key or connection error.";
       } finally {
         isConnecting.value = false;
       }
@@ -470,33 +406,6 @@ export default {
     };
 
     onMounted(async () => {
-      // Verificar disponibilidade do Freighter - tentamos mais de uma vez com um pequeno atraso
-      // para garantir que as extensões do navegador foram carregadas corretamente
-      freighterStatus.value = "checking";
-
-      try {
-        // Primeira tentativa
-        const available = await FreighterService.checkFreighterAvailability();
-        if (available) {
-          freighterStatus.value = "available";
-        } else {
-          // Segunda tentativa após um breve atraso
-          setTimeout(async () => {
-            try {
-              const secondCheck =
-                await FreighterService.checkFreighterAvailability();
-              freighterStatus.value = secondCheck
-                ? "available"
-                : "not-installed";
-            } catch {
-              freighterStatus.value = "not-installed";
-            }
-          }, 500);
-        }
-      } catch {
-        freighterStatus.value = "not-installed";
-      }
-
       // Tentar carregar carteira salva (Freighter tem prioridade)
       const savedWallet = await WalletService.loadSavedWallet();
       if (savedWallet) {
@@ -512,19 +421,16 @@ export default {
       isConnected,
       isGenerating,
       isConnecting,
-      isConnectingFreighter,
       secretKey,
       secretKeyError,
       balance,
       showDetails,
       showSecretKey,
       copyButtonText,
-      freighterStatus,
       walletType,
       currentPublicKey,
       currentSecretKey,
       formattedPublicKey,
-      connectWithFreighter,
       generateNewWallet,
       connectWithSecret,
       disconnect,
