@@ -41,7 +41,7 @@
     </div>
 
     <!-- Legend Forge Section - The 3-step infographic -->
-    <LegendForge />
+    <LegendForge @launch-game="handleLaunchGame" />
 
     <!-- WebGL Game Container -->
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
@@ -488,7 +488,7 @@ export default {
         },
         secondaryButton: {
           text: "Forge a New Myth",
-          icon: "Wallet",
+          icon: "Iron",
         },
         stats: {
           players: "1M+",
@@ -528,7 +528,25 @@ export default {
   },
   methods: {
     launchGame() {
-      window.open('/webgl/index.html', '_blank', 'fullscreen=yes');
+      // Encontra o elemento do contêiner Unity
+      const unityContainer = this.$refs.unityContainer;
+
+      // Rola a página até o contêiner do Unity
+      if (unityContainer) {
+        // Verifica se o jogo já foi carregado
+        if (!this.gameLoaded) {
+          // Se o jogo ainda não foi carregado, vamos inicializá-lo primeiro
+          this.initUnityWebGL();
+        }
+
+        // Rola suavemente até o contêiner
+        unityContainer.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        // Após a rolagem, ativa o modo de tela cheia
+        setTimeout(() => {
+          this.enterFullscreen();
+        }, 1000); // Aguarda 1 segundo para a rolagem terminar
+      }
     },
     async loadRecentBlessings() {
       try {
@@ -613,7 +631,10 @@ export default {
 
     handleLaunchGame() {
       console.log("Launching game...");
-      // Use Unity service to start the game
+      // Chama o método launchGame que vai rolar a página e ativar o modo fullscreen
+      this.launchGame();
+
+      // Usa o Unity service para iniciar o jogo (se necessário)
       if (unityService.isUnityLoaded()) {
         const success = unityService.startGame();
         if (!success) {

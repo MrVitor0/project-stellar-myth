@@ -2,109 +2,112 @@
   <div
     class="bg-gradient-to-br from-gray-800/80 to-gray-900/90 p-6 rounded-2xl border border-brazil-green/20"
   >
-    <div v-if="!isConnected" class="space-y-4">
-      <h3 class="text-xl font-bold text-mist-white mb-4">
-        <svg
-          class="w-6 h-6 inline-block mr-2"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
-            clip-rule="evenodd"
-          />
-        </svg>
-        Connect Your Wallet
-      </h3>
-
-      <p class="text-gray-400 text-sm mb-6">
-        In order to interact with the Stellar Testnet, you need to connect a
-        wallet. You can either generate a new wallet or connect using an
-        existing secret key.
-      </p>
-    </div>
-
-    <div class="space-y-3">
-      <!-- Freighter Connection Button (shown first if available) -->
-      <BaseButton
-        v-if="freighterStatus === 'available'"
-        @click="connectWithFreighter"
-        :loading="isConnectingFreighter"
-        variant="primary"
-        class="w-full"
-      >
-        <template #icon>
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </template>
-        Connect with Freighter
-      </BaseButton>
-
-      <!-- Divider if Freighter is available -->
-      <div v-if="freighterStatus === 'available'" class="relative">
-        <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-gray-600"></div>
-        </div>
-        <div class="relative flex justify-center text-sm">
-          <span class="px-2 bg-gray-800 text-gray-400"
-            >or use local wallet</span
+    <!-- Mostra as opções de conexão apenas quando não está conectado -->
+    <div v-if="!isConnected">
+      <div class="space-y-4">
+        <h3 class="text-xl font-bold text-mist-white mb-4">
+          <svg
+            class="w-6 h-6 inline-block mr-2"
+            fill="currentColor"
+            viewBox="0 0 20 20"
           >
-        </div>
-      </div>
-
-      <BaseButton
-        @click="generateNewWallet"
-        :loading="isGenerating"
-        :variant="freighterStatus === 'available' ? 'secondary' : 'primary'"
-        class="w-full"
-      >
-        <template #icon>
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path
               fill-rule="evenodd"
-              d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+              d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
               clip-rule="evenodd"
             />
           </svg>
-        </template>
-        Generate New Local Wallet
-      </BaseButton>
+          Connect Your Wallet
+        </h3>
 
-      <div class="relative">
-        <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-gray-600"></div>
-        </div>
-        <div class="relative flex justify-center text-sm">
-          <span class="px-2 bg-gray-800 text-gray-400">or</span>
-        </div>
+        <p class="text-gray-400 text-sm mb-6">
+          In order to interact with the Stellar Testnet, you need to connect a
+          wallet. You can either generate a new wallet or connect using an
+          existing secret key.
+        </p>
       </div>
 
-      <div class="space-y-2">
-        <label class="block text-sm font-medium text-mist-white">
-          Existing Secret Key
-        </label>
-        <div class="flex space-x-2">
-          <input
-            v-model="secretKey"
-            type="password"
-            placeholder="SXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-            class="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brazil-green focus:border-transparent"
-            :class="{ 'border-red-500': secretKeyError }"
-          />
-          <BaseButton
-            @click="connectWithSecret"
-            :loading="isConnecting"
-            :disabled="!secretKey.trim()"
-            variant="secondary"
-          >
-            Connect
-          </BaseButton>
+      <div class="space-y-3">
+        <!-- Freighter Connection Button (shown first if available) -->
+        <BaseButton
+          v-if="freighterStatus === 'available'"
+          @click="connectWithFreighter"
+          :loading="isConnectingFreighter"
+          variant="primary"
+          class="w-full"
+        >
+          <template #icon>
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </template>
+          Connect with Freighter
+        </BaseButton>
+
+        <!-- Divider if Freighter is available -->
+        <div v-if="freighterStatus === 'available'" class="relative">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-600"></div>
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="px-2 bg-gray-800 text-gray-400"
+              >or use local wallet</span
+            >
+          </div>
         </div>
-        <span v-if="secretKeyError" class="text-red-400 text-xs">{{
-          secretKeyError
-        }}</span>
+
+        <BaseButton
+          @click="generateNewWallet"
+          :loading="isGenerating"
+          :variant="freighterStatus === 'available' ? 'secondary' : 'primary'"
+          class="w-full"
+        >
+          <template #icon>
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </template>
+          Generate New Local Wallet
+        </BaseButton>
+
+        <div class="relative">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-600"></div>
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="px-2 bg-gray-800 text-gray-400">or</span>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-mist-white">
+            Existing Secret Key
+          </label>
+          <div class="flex space-x-2">
+            <input
+              v-model="secretKey"
+              type="password"
+              placeholder="SXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+              class="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brazil-green focus:border-transparent"
+              :class="{ 'border-red-500': secretKeyError }"
+            />
+            <BaseButton
+              @click="connectWithSecret"
+              :loading="isConnecting"
+              :disabled="!secretKey.trim()"
+              variant="secondary"
+            >
+              Connect
+            </BaseButton>
+          </div>
+          <span v-if="secretKeyError" class="text-red-400 text-xs">{{
+            secretKeyError
+          }}</span>
+        </div>
       </div>
     </div>
 

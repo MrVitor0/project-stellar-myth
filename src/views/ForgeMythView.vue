@@ -60,7 +60,35 @@
               to connect a Stellar wallet. Your myths will be permanently stored
               as smart contract data.
             </p>
+
+            <!-- Mostrar mensagem quando a carteira já está conectada -->
+            <div v-if="isWalletConnected" class="text-center mb-6">
+              <div
+                class="inline-flex items-center justify-center px-4 py-2 bg-green-600/20 rounded-full border border-green-600/30 text-green-300 mb-4"
+              >
+                <svg
+                  class="w-5 h-5 mr-2"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+                <span class="font-medium">Carteira já conectada</span>
+              </div>
+              <p class="text-gray-300">
+                Sua carteira Stellar já está conectada e pronta para uso.
+              </p>
+              <BaseButton @click="nextStep" class="mt-4" variant="primary"
+                >Prosseguir para o próximo passo</BaseButton
+              >
+            </div>
+
             <WalletConnector
+              v-show="!isWalletConnected || currentStep === 0"
               @wallet-connected="onWalletConnected"
               @wallet-disconnected="onWalletDisconnected"
             />
@@ -430,6 +458,7 @@ import WalletService from "@/services/WalletService.js";
 import Navbar from "@/components/Navbar.vue";
 import CustomSelect from "@/components/CustomSelect.vue";
 import WalletConnector from "@/components/WalletConnector.vue";
+import BaseButton from "@/components/BaseButton.vue";
 
 export default {
   name: "ForgeMythView",
@@ -437,6 +466,7 @@ export default {
     Navbar,
     CustomSelect,
     WalletConnector,
+    BaseButton,
   },
   setup() {
     const router = useRouter();
@@ -878,11 +908,17 @@ export default {
 
     const onWalletConnected = (publicKey) => {
       isWalletConnected.value = true;
-      console.log("✅ Wallet connected:", publicKey);
 
       // Verificar o tipo de carteira e atualizar o status correspondente
       const walletType = WalletService.getWalletType();
       console.log("Wallet type:", walletType);
+
+      // Avançar automaticamente para o próximo passo quando a carteira for conectada
+      if (currentStep.value === 0) {
+        setTimeout(() => {
+          nextStep();
+        }, 1000); // Pequeno atraso para dar feedback visual ao usuário
+      }
     };
 
     const onWalletDisconnected = () => {

@@ -28,13 +28,6 @@
           class="btn-secondary group inline-flex items-center justify-center"
         >
           {{ secondaryButton.text }}
-          <div
-            class="w-2 h-2 bg-brazil-green rounded-full animate-pulse ml-2"
-          ></div>
-          <component
-            :is="secondaryButton.icon"
-            class="ml-2 w-4 h-4 group-hover:rotate-12 transition-transform"
-          />
         </button>
       </div>
     </div>
@@ -55,8 +48,9 @@ export default {
   },
   methods: {
     launchGame() {
-      window.open('/webgl/index.html', '_blank', 'fullscreen=yes');
-    }
+      // Emite um evento para o componente pai
+      this.$emit("launch-game");
+    },
   },
   props: {
     title: {

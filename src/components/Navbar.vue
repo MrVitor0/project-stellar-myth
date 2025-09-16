@@ -25,7 +25,7 @@
             to="/login"
             class="text-mid-gray hover:text-brazil-green transition-colors duration-300"
           >
-            Join Community
+            Join Steller Myth
           </router-link>
         </div>
       </div>

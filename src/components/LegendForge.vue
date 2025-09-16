@@ -192,8 +192,9 @@ export default {
   name: "LegendForge",
   methods: {
     launchGame() {
-      window.open('/webgl/index.html', '_blank', 'fullscreen=yes');
-    }
+      // Emite um evento para o componente pai
+      this.$emit("launch-game");
+    },
   },
 };
 </script>
