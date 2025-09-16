@@ -50,8 +50,24 @@
         <div
           class="bg-gradient-to-br from-gray-800/80 to-gray-900/90 p-8 rounded-2xl border border-brazil-green/20"
         >
-          <!-- Step 1: Basic Information -->
+          <!-- Step 0: Wallet Connection -->
           <div v-if="currentStep === 0" class="space-y-6">
+            <h2 class="text-2xl font-bold text-mist-white mb-6 text-center">
+              Connect Your Stellar Wallet
+            </h2>
+            <p class="text-gray-400 text-center mb-8">
+              To create and store your myth on the Stellar blockchain, you need
+              to connect a Stellar wallet. Your myths will be permanently stored
+              as smart contract data.
+            </p>
+            <WalletConnector
+              @wallet-connected="onWalletConnected"
+              @wallet-disconnected="onWalletDisconnected"
+            />
+          </div>
+
+          <!-- Step 1: Basic Information -->
+          <div v-if="currentStep === 1" class="space-y-6">
             <h2 class="text-2xl font-bold text-mist-white mb-6">
               Basic Information
             </h2>
@@ -92,7 +108,7 @@
           </div>
 
           <!-- Step 2: Item Properties -->
-          <div v-if="currentStep === 1" class="space-y-6">
+          <div v-if="currentStep === 2" class="space-y-6">
             <h2 class="text-2xl font-bold text-mist-white mb-6">
               Item Properties
             </h2>
@@ -156,7 +172,7 @@
           </div>
 
           <!-- Step 3: Visual & Effects -->
-          <div v-if="currentStep === 2" class="space-y-6">
+          <div v-if="currentStep === 3" class="space-y-6">
             <h2 class="text-2xl font-bold text-mist-white mb-6">
               Visual & Effects
             </h2>
@@ -238,7 +254,7 @@
           </div>
 
           <!-- Step 4: Review -->
-          <div v-if="currentStep === 3" class="space-y-6">
+          <div v-if="currentStep === 4" class="space-y-6">
             <h2 class="text-2xl font-bold text-mist-white mb-6">
               Review Your Item
             </h2>
@@ -247,43 +263,53 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
                   <span class="text-brazil-green font-medium">Name:</span>
-                  <span class="text-mist-white ml-2">{{ formData.title }}</span>
+                  <span class="text-mist-white ml-2">{{
+                    formData.title || "Not set"
+                  }}</span>
                 </div>
                 <div>
-                  <span class="text-brazil-green font-medium">Title:</span>
-                  <span class="text-mist-white ml-2">{{ formData.title }}</span>
+                  <span class="text-brazil-green font-medium">Type:</span>
+                  <span class="text-mist-white ml-2">{{
+                    getOptionTypeLabel(formData.optionType) || "Not set"
+                  }}</span>
                 </div>
                 <div class="md:col-span-2">
                   <span class="text-brazil-green font-medium"
                     >Description:</span
                   >
                   <span class="text-mist-white ml-2">{{
-                    formData.description
-                  }}</span>
-                </div>
-                <div>
-                  <span class="text-brazil-green font-medium">Type:</span>
-                  <span class="text-mist-white ml-2">{{
-                    formData.optionType
+                    formData.description || "Not set"
                   }}</span>
                 </div>
                 <div>
                   <span class="text-brazil-green font-medium">Rarity:</span>
                   <span
-                    class="text-mist-white ml-2 capitalize"
+                    class="text-mist-white ml-2 capitalize font-semibold"
                     :class="getRarityColor(formData.rarity)"
-                    >{{ formData.rarity }}</span
+                    >{{ formData.rarity?.toUpperCase() || "Not set" }}</span
                   >
                 </div>
                 <div>
                   <span class="text-brazil-green font-medium"
                     >Buff Amount:</span
                   >
-                  <span class="text-mist-white ml-2">{{ formData.value }}</span>
+                  <span class="text-mist-white ml-2">{{
+                    formData.value || 0
+                  }}</span>
+                </div>
+                <div class="md:col-span-2">
+                  <span class="text-brazil-green font-medium"
+                    >Buff Effect:</span
+                  >
+                  <span class="text-mist-white ml-2">{{
+                    formData.buff || "Not set"
+                  }}</span>
                 </div>
                 <div>
-                  <span class="text-brazil-green font-medium">Buff:</span>
-                  <span class="text-mist-white ml-2">{{ formData.buff }}</span>
+                  <span class="text-brazil-green font-medium">Cost:</span>
+                  <span class="text-brazil-yellow ml-2 font-semibold"
+                    >{{ formData.cost || 0 }} XLM</span
+                  >
                 </div>
                 <div v-if="formData.isSpecial" class="md:col-span-2">
                   <span class="text-mystic-cyan font-medium"
@@ -294,6 +320,38 @@
                     +{{ formData.specialEffects.staminaBonus }}, Damage: +{{
                       formData.specialEffects.damageBonus
                     }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Blockchain info -->
+              <div class="mt-6 pt-4 border-t border-gray-600">
+                <h4
+                  class="text-sm font-semibold text-mist-white mb-3 flex items-center"
+                >
+                  <svg
+                    class="w-4 h-4 mr-2"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 000 2h6a1 1 0 100-2H7zm6 7a1 1 0 01-1 1H8a1 1 0 110-2h4a1 1 0 011 1zm-1 4a1 1 0 100-2H8a1 1 0 100 2h4z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  Blockchain Information
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <span class="text-gray-400">Network:</span>
+                    <p class="font-mono text-mystic-cyan">Stellar Testnet</p>
+                  </div>
+                  <div>
+                    <span class="text-gray-400">Contract ID:</span>
+                    <p class="font-mono text-brazil-green text-[10px]">
+                      CAKHS4ZPT7YGOXDKX...
+                    </p>
                   </div>
                 </div>
               </div>
@@ -322,9 +380,35 @@
             <button
               v-else
               @click="submitForm"
-              class="px-6 py-3 bg-mystic-cyan text-white rounded-lg hover:bg-mystic-cyan/80 transition-colors"
+              :disabled="isSubmitting"
+              class="px-6 py-3 bg-mystic-cyan text-white rounded-lg hover:bg-mystic-cyan/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
             >
-              Create Item
+              <svg
+                v-if="isSubmitting"
+                class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              <span>{{
+                isSubmitting
+                  ? "Creating on Blockchain..."
+                  : "Create Myth on Blockchain"
+              }}</span>
             </button>
           </div>
         </div>
@@ -341,24 +425,31 @@ import { required, minValue } from "@vuelidate/validators";
 import { v4 as uuidv4 } from "uuid";
 import Swal from "sweetalert2";
 import AuthService from "@/services/AuthService";
+import SorobanService from "@/services/SorobanService.js";
+import WalletService from "@/services/WalletService.js";
 import Navbar from "@/components/Navbar.vue";
 import CustomSelect from "@/components/CustomSelect.vue";
+import WalletConnector from "@/components/WalletConnector.vue";
 
 export default {
   name: "ForgeMythView",
   components: {
     Navbar,
     CustomSelect,
+    WalletConnector,
   },
   setup() {
     const router = useRouter();
     const currentUser = ref(null);
     const currentStep = ref(0);
+    const isWalletConnected = ref(false);
+    const isSubmitting = ref(false);
 
     const steps = [
-      { title: "Basic Info" },
+      { title: "Connect" },
+      { title: "Basics" },
       { title: "Properties" },
-      { title: "Visual & Effects" },
+      { title: "Visual" },
       { title: "Review" },
     ];
 
@@ -467,16 +558,18 @@ export default {
     const isCurrentStepValid = computed(() => {
       switch (currentStep.value) {
         case 0:
-          return !$v.value.title.$invalid && !$v.value.description.$invalid;
+          return isWalletConnected.value;
         case 1:
+          return !$v.value.title.$invalid && !$v.value.description.$invalid;
+        case 2:
           return (
             !$v.value.optionType.$invalid &&
             !$v.value.rarity.$invalid &&
             !$v.value.value.$invalid
           );
-        case 2:
-          return !$v.value.buff.$invalid;
         case 3:
+          return !$v.value.buff.$invalid;
+        case 4:
           return true;
         default:
           return false;
@@ -578,14 +671,21 @@ export default {
 
     const submitForm = async () => {
       await $v.value.$validate();
-      if (!$v.value.$invalid) {
+      if (!$v.value.$invalid && isWalletConnected.value) {
+        isSubmitting.value = true;
+
         // Show loading alert
         Swal.fire({
           title: "Creating Your Myth...",
           html: `
             <div class="flex flex-col items-center space-y-4">
               <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-              <p class="text-gray-600">Forging your legendary item in the cosmic realm...</p>
+              <p class="text-gray-600">Forging your legendary item on the Stellar blockchain...</p>
+              <div class="text-xs text-gray-500">
+                <p>• Preparing transaction data</p>
+                <p>• Submitting to Soroban contract</p>
+                <p>• Waiting for network confirmation</p>
+              </div>
             </div>
           `,
           allowOutsideClick: false,
@@ -598,85 +698,220 @@ export default {
           },
         });
 
-        // Simulate creation process (you can replace this with actual API call)
-        await new Promise((resolve) => setTimeout(resolve, 3000));
+        try {
+          // Generate stellar transaction ID and icon
+          formData.stellarTransactionId = generateTransactionId();
+          formData.icon = generateIcon(formData.optionType);
+          formData.optionName = formData.title; // Option name same as title
 
-        // Generate stellar transaction ID and icon
-        formData.stellarTransactionId = generateTransactionId();
-        formData.icon = generateIcon(formData.optionType);
-        formData.optionName = formData.title; // Option name same as title
-
-        // Create the final item object
-        const newItem = {
-          optionName: formData.title, // Use title as option name
-          description: formData.description,
-          stellarTransactionId: formData.stellarTransactionId,
-          title: formData.title,
-          buff: formData.buff,
-          icon: formData.icon,
-          optionType: formData.optionType,
-          value: formData.value,
-          rarity: formData.rarity,
-          cost: 0, // Always 0 as requested
-        };
-
-        // Add special effects if mythic and special
-        if (formData.rarity === "mythic" && formData.isSpecial) {
-          newItem.isSpecial = true;
-          newItem.specialEffects = {
-            healthBonus: formData.specialEffects.healthBonus,
-            staminaBonus: formData.specialEffects.staminaBonus,
-            damageBonus: formData.specialEffects.damageBonus,
+          // Create the option object for the contract
+          const optionData = {
+            optionName: formData.title,
+            description: formData.description,
+            stellarTransactionId: formData.stellarTransactionId,
+            title: formData.title,
+            buff: formData.buff,
+            icon: formData.icon,
+            optionType: formData.optionType,
+            value: Number(formData.value),
+            rarity: formData.rarity,
+            cost: 0, // Always 0 as requested
           };
-        }
 
-        // Output the created item
-        console.log("🎮 New Item Created:", JSON.stringify(newItem, null, 2));
-
-        // Close loading and show success
-        Swal.fire({
-          title: "Myth Created Successfully!",
-          html: `
-            <div class="space-y-4">
-              <p class="text-lg font-semibold text-blue-300">${
-                formData.title
-              }</p>
-              <p class="text-sm text-gray-400">${formData.description}</p>
-              <div class="bg-gray-800 p-3 rounded-lg">
-                <p class="text-sm"><strong>Type:</strong> ${getOptionTypeLabel(
-                  formData.optionType
-                )}</p>
-                <p class="text-sm"><strong>Rarity:</strong> <span class="capitalize text-${getRarityColorName(
-                  formData.rarity
-                )}-400">${formData.rarity}</span></p>
-                <p class="text-sm"><strong>Effect:</strong> ${formData.buff}</p>
-                <p class="text-sm"><strong>Transaction ID:</strong> ${
-                  formData.stellarTransactionId
-                }</p>
-              </div>
-              <p class="text-xs text-gray-500">Your myth has been added to the cosmic registry and will be available for all players!</p>
-            </div>
-          `,
-          icon: "success",
-          confirmButtonText: "Return to Home",
-          confirmButtonColor: "#10b981",
-          background: "#1f2937",
-          color: "#f9fafb",
-          customClass: {
-            popup: "border border-gray-600",
-          },
-        }).then((result) => {
-          if (result.isConfirmed) {
-            router.push("/");
+          // Add special effects if mythic and special
+          if (formData.rarity === "mythic" && formData.isSpecial) {
+            optionData.isSpecial = true;
+            optionData.specialEffects = {
+              healthBonus: Number(formData.specialEffects.healthBonus),
+              staminaBonus: Number(formData.specialEffects.staminaBonus),
+              damageBonus: Number(formData.specialEffects.damageBonus),
+            };
           }
-        });
+
+          // Verifica o tipo de carteira conectada
+          const walletType = WalletService.getWalletType();
+          let result;
+
+          console.log("🚀 Submitting to Soroban contract:", optionData);
+
+          if (walletType === "freighter") {
+            // Usando Freighter para assinar a transação
+            result = await SorobanService.createOptionWithFreighter(optionData);
+          } else {
+            // Usando carteira local com keypair
+            const keypair = WalletService.getCurrentKeypair();
+            if (!keypair) {
+              throw new Error("Wallet not connected");
+            }
+            result = await SorobanService.createOption(keypair, optionData);
+          }
+
+          console.log("✅ Contract response:", result);
+
+          // Close loading and show success
+          Swal.fire({
+            title: "Myth Created Successfully!",
+            html: `
+              <div class="space-y-4">
+                <div class="flex items-center justify-center mb-4">
+                  <div class="w-16 h-16 rounded-full bg-gradient-to-br from-brazil-green to-mystic-cyan flex items-center justify-center">
+                    <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+                <p class="text-lg font-semibold text-blue-300">${
+                  formData.title
+                }</p>
+                <p class="text-sm text-gray-400">${formData.description}</p>
+                <div class="bg-gray-800 p-4 rounded-lg space-y-2">
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-400">Transaction ID:</span>
+                    <span class="font-mono text-xs text-green-400">${
+                      formData.stellarTransactionId
+                    }</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-400">Stellar Hash:</span>
+                    <span class="font-mono text-xs text-blue-400">${result.hash.substring(
+                      0,
+                      16
+                    )}...</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-400">Rarity:</span>
+                    <span class="font-semibold ${getRarityColor(
+                      formData.rarity
+                    )}">${formData.rarity.toUpperCase()}</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-400">Effect:</span>
+                    <span class="text-white">${formData.buff}</span>
+                  </div>
+                </div>
+                <div class="text-xs text-gray-500 bg-green-900/20 border border-green-600/30 rounded p-3">
+                  <div class="flex items-start space-x-2">
+                    <svg class="w-4 h-4 text-green-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <div>
+                      <p class="text-green-200 font-semibold">Successfully recorded on Stellar blockchain!</p>
+                      <p class="text-green-300 mt-1">Your myth has been permanently stored on the decentralized ledger and is now available for all players in the cosmic realm!</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `,
+            icon: "success",
+            confirmButtonText: "Create Another Myth",
+            showCancelButton: true,
+            cancelButtonText: "Return to Home",
+            confirmButtonColor: "#10b981",
+            cancelButtonColor: "#6b7280",
+            background: "#1f2937",
+            color: "#f9fafb",
+            customClass: {
+              popup: "border border-gray-600",
+            },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // Reset form for creating another myth
+              resetForm();
+            } else {
+              router.push("/");
+            }
+          });
+        } catch (error) {
+          console.error("❌ Error creating option:", error);
+
+          Swal.fire({
+            title: "Error Creating Myth",
+            html: `
+              <div class="space-y-4">
+                <p class="text-red-300">Failed to create myth on the blockchain</p>
+                <div class="bg-red-900/20 border border-red-600/30 rounded p-3 text-left">
+                  <p class="text-red-200 text-sm font-semibold mb-1">Error Details:</p>
+                  <p class="text-red-300 text-xs font-mono">${
+                    error.message || "Unknown error occurred"
+                  }</p>
+                </div>
+                <p class="text-xs text-gray-400">
+                  Please check your wallet connection and try again. Make sure you have enough XLM for transaction fees.
+                </p>
+              </div>
+            `,
+            icon: "error",
+            confirmButtonText: "Try Again",
+            confirmButtonColor: "#dc2626",
+            background: "#1f2937",
+            color: "#f9fafb",
+            customClass: {
+              popup: "border border-gray-600",
+            },
+          });
+        } finally {
+          isSubmitting.value = false;
+        }
       }
     };
 
-    onMounted(() => {
+    const resetForm = () => {
+      // Reset form data
+      Object.assign(formData, {
+        optionName: "",
+        description: "",
+        stellarTransactionId: "",
+        title: "",
+        buff: "",
+        icon: "default_icon",
+        optionType: "",
+        value: 0,
+        rarity: "",
+        cost: 0,
+        isSpecial: false,
+        specialEffects: {
+          healthBonus: 0,
+          staminaBonus: 0,
+          damageBonus: 0,
+        },
+      });
+
+      // Reset form validation
+      $v.value.$reset();
+
+      // Go back to step 1 (after wallet connection)
+      currentStep.value = 1;
+    };
+
+    const onWalletConnected = (publicKey) => {
+      isWalletConnected.value = true;
+      console.log("✅ Wallet connected:", publicKey);
+
+      // Verificar o tipo de carteira e atualizar o status correspondente
+      const walletType = WalletService.getWalletType();
+      console.log("Wallet type:", walletType);
+    };
+
+    const onWalletDisconnected = () => {
+      isWalletConnected.value = false;
+      // Reset to wallet connection step if wallet is disconnected
+      if (currentStep.value > 0) {
+        currentStep.value = 0;
+      }
+    };
+
+    onMounted(async () => {
       currentUser.value = AuthService.getCurrentUser();
       if (!currentUser.value) {
         router.push("/login");
+      }
+
+      // Check if wallet is already connected
+      const savedWallet = await WalletService.loadSavedWallet();
+      if (savedWallet) {
+        isWalletConnected.value = true;
+        // Skip wallet connection step if already connected
+        currentStep.value = 1;
       }
     });
 
@@ -689,11 +924,19 @@ export default {
       formData,
       $v,
       isCurrentStepValid,
+      isWalletConnected,
+      isSubmitting,
       nextStep,
       previousStep,
       updateBuffDescription,
       submitForm,
+      resetForm,
+      onWalletConnected,
+      onWalletDisconnected,
       getRarityColor,
+      getOptionTypeLabel,
+      getRarityColorName,
+      WalletService,
     };
   },
 };

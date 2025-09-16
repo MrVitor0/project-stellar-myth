@@ -1,0 +1,13 @@
+{
+  "optionName": "String",
+  "description": "String",
+  "stellarTransactionId": "String",
+  "title": "String",
+  "buff": "String",
+  "icon": "String",
+  "optionType": "String",
+  "value": "u64",
+  "rarity": "String",
+  "cost": "u64",
+  "owner": "Address"
+}

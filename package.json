@@ -9,10 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@stellar/freighter-api": "^5.0.0",
+    "@stellar/stellar-sdk": "^14.1.1",
     "@vuelidate/core": "^2.0.3",
     "@vuelidate/validators": "^2.0.4",
     "firebase": "^12.2.1",
     "lucide-vue-next": "^0.544.0",
+    "soroban-client": "^1.0.1",
+    "stellar-sdk": "^13.3.0",
     "sweetalert2": "^11.23.0",
     "uuid": "^13.0.0",
     "vue": "^3.4.0",
