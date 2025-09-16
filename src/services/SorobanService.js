@@ -18,7 +18,7 @@ class SorobanService {
 
     this.networkPassphrase = StellarSdk.Networks.TESTNET;
     this.contractAddress =
-      "CAKHS4ZPT7YGOXDKXEXSH6G7VQPA5K3MUICQDBXZRAJSLOKRT67KY3S4";
+      "CD526WKMSZSLERLVRKMPMBDQ5KIEYGTDKW6N3SZCODAA44SMXTKCUMJJ";
   }
 
   /**
