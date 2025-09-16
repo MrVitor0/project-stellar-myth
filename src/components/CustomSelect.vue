@@ -5,21 +5,23 @@
       @click="toggleDropdown"
       :class="[
         'w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-left text-white focus:outline-none transition-all duration-300 flex items-center justify-between',
-        isOpen ? 'border-brazil-green shadow-lg shadow-brazil-green/20' : 'hover:border-gray-500',
+        isOpen
+          ? 'border-brazil-green shadow-lg shadow-brazil-green/20'
+          : 'hover:border-gray-500',
         hasError ? 'border-red-500' : '',
-        disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+        disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
       ]"
       :disabled="disabled"
     >
       <span :class="selectedOption ? 'text-white' : 'text-gray-400'">
         {{ selectedOption ? selectedOption.label : placeholder }}
       </span>
-      
+
       <!-- Arrow Icon -->
       <svg
         :class="[
           'w-5 h-5 transition-transform duration-300',
-          isOpen ? 'rotate-180 text-brazil-green' : 'text-gray-400'
+          isOpen ? 'rotate-180 text-brazil-green' : 'text-gray-400',
         ]"
         fill="none"
         viewBox="0 0 24 24"
@@ -68,9 +70,9 @@
             :class="[
               'px-4 py-3 cursor-pointer transition-all duration-200 flex items-center',
               'hover:bg-brazil-green/20 hover:text-brazil-green',
-              selectedOption && selectedOption.value === option.value 
-                ? 'bg-brazil-green/30 text-brazil-green border-l-4 border-brazil-green' 
-                : 'text-gray-300'
+              selectedOption && selectedOption.value === option.value
+                ? 'bg-brazil-green/30 text-brazil-green border-l-4 border-brazil-green'
+                : 'text-gray-300',
             ]"
           >
             <!-- Option Icon (if provided) -->
@@ -79,7 +81,7 @@
               class="w-5 h-5 mr-3 flex-shrink-0"
               v-html="option.icon"
             ></div>
-            
+
             <!-- Option Content -->
             <div class="flex-1">
               <div class="font-medium">{{ option.label }}</div>
@@ -93,7 +95,7 @@
               v-if="option.rarity"
               :class="[
                 'px-2 py-1 rounded-full text-xs font-medium ml-2',
-                getRarityColorClasses(option.rarity)
+                getRarityColorClasses(option.rarity),
               ]"
             >
               {{ option.rarity }}
@@ -128,58 +130,60 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from "vue";
 
 export default {
-  name: 'CustomSelect',
+  name: "CustomSelect",
   props: {
     modelValue: {
       type: [String, Number, Object],
-      default: null
+      default: null,
     },
     options: {
       type: Array,
       required: true,
-      default: () => []
+      default: () => [],
     },
     placeholder: {
       type: String,
-      default: 'Select an option...'
+      default: "Select an option...",
     },
     disabled: {
       type: Boolean,
-      default: false
+      default: false,
     },
     searchable: {
       type: Boolean,
-      default: false
+      default: false,
     },
     hasError: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
-  emits: ['update:modelValue', 'change'],
+  emits: ["update:modelValue", "change"],
   setup(props, { emit }) {
     const isOpen = ref(false);
-    const searchQuery = ref('');
+    const searchQuery = ref("");
     const selectContainer = ref(null);
     const searchInput = ref(null);
 
     const selectedOption = computed(() => {
       if (!props.modelValue) return null;
-      return props.options.find(option => option.value === props.modelValue);
+      return props.options.find((option) => option.value === props.modelValue);
     });
 
     const filteredOptions = computed(() => {
       if (!props.searchable || !searchQuery.value) {
         return props.options;
       }
-      
+
       const query = searchQuery.value.toLowerCase();
-      return props.options.filter(option => 
-        option.label.toLowerCase().includes(query) ||
-        (option.description && option.description.toLowerCase().includes(query))
+      return props.options.filter(
+        (option) =>
+          option.label.toLowerCase().includes(query) ||
+          (option.description &&
+            option.description.toLowerCase().includes(query))
       );
     });
 
@@ -189,26 +193,29 @@ export default {
     };
 
     const selectOption = (option) => {
-      emit('update:modelValue', option.value);
-      emit('change', option);
+      emit("update:modelValue", option.value);
+      emit("change", option);
       isOpen.value = false;
-      searchQuery.value = '';
+      searchQuery.value = "";
     };
 
     const closeDropdown = (event) => {
-      if (selectContainer.value && !selectContainer.value.contains(event.target)) {
+      if (
+        selectContainer.value &&
+        !selectContainer.value.contains(event.target)
+      ) {
         isOpen.value = false;
-        searchQuery.value = '';
+        searchQuery.value = "";
       }
     };
 
     const getRarityColorClasses = (rarity) => {
       const colors = {
-        common: 'bg-gray-500/20 text-gray-300 border border-gray-500',
-        rare: 'bg-blue-500/20 text-blue-300 border border-blue-500',
-        epic: 'bg-purple-500/20 text-purple-300 border border-purple-500',
-        legendary: 'bg-yellow-500/20 text-yellow-300 border border-yellow-500',
-        mythic: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500'
+        common: "bg-gray-500/20 text-gray-300 border border-gray-500",
+        rare: "bg-blue-500/20 text-blue-300 border border-blue-500",
+        epic: "bg-purple-500/20 text-purple-300 border border-purple-500",
+        legendary: "bg-yellow-500/20 text-yellow-300 border border-yellow-500",
+        mythic: "bg-cyan-500/20 text-cyan-300 border border-cyan-500",
       };
       return colors[rarity] || colors.common;
     };
@@ -222,11 +229,11 @@ export default {
     });
 
     onMounted(() => {
-      document.addEventListener('click', closeDropdown);
+      document.addEventListener("click", closeDropdown);
     });
 
     onUnmounted(() => {
-      document.removeEventListener('click', closeDropdown);
+      document.removeEventListener("click", closeDropdown);
     });
 
     return {
@@ -238,8 +245,8 @@ export default {
       filteredOptions,
       toggleDropdown,
       selectOption,
-      getRarityColorClasses
+      getRarityColorClasses,
     };
-  }
+  },
 };
 </script>

@@ -5,8 +5,12 @@
       <h1
         class="text-4xl font-bold text-brazil-yellow glow-text mb-6 text-center"
       >
-        Item Forge Wizard
+        Myth Forge
       </h1>
+      <p class="text-mist-white text-center mb-12">
+        Create and customize your own myth's with our easy-to-use wizard, as
+        soon it's created, all players will be able to eventually use it!
+      </p>
 
       <div class="max-w-4xl mx-auto mt-12">
         <!-- Progress Bar -->
@@ -96,21 +100,16 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label class="block text-mist-white font-medium mb-2"
-                  >Option Type</label
+                  >Type Of Myth</label
                 >
-                <select
+                <CustomSelect
                   v-model="formData.optionType"
+                  :options="optionTypeOptions"
+                  placeholder="Select item type..."
+                  :has-error="$v.optionType.$error"
+                  searchable
                   @change="updateBuffDescription"
-                  class="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-brazil-green"
-                  :class="{ 'border-red-500': $v.optionType.$error }"
-                >
-                  <option value="">Select type...</option>
-                  <option value="HealthUpgrade">Health Upgrade</option>
-                  <option value="StaminaUpgrade">Stamina Upgrade</option>
-                  <option value="HealOnly">Heal Only</option>
-                  <option value="StaminaRestore">Stamina Restore</option>
-                  <option value="DamageIncrease">Damage Increase</option>
-                </select>
+                />
                 <span v-if="$v.optionType.$error" class="text-red-500 text-sm"
                   >Option type is required</span
                 >
@@ -120,18 +119,13 @@
                 <label class="block text-mist-white font-medium mb-2"
                   >Rarity</label
                 >
-                <select
+                <CustomSelect
                   v-model="formData.rarity"
-                  class="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-brazil-green"
-                  :class="{ 'border-red-500': $v.rarity.$error }"
-                >
-                  <option value="">Select rarity...</option>
-                  <option value="common">Common</option>
-                  <option value="rare">Rare</option>
-                  <option value="epic">Epic</option>
-                  <option value="legendary">Legendary</option>
-                  <option value="mythic">Mythic</option>
-                </select>
+                  :options="rarityOptions"
+                  placeholder="Select rarity level..."
+                  :has-error="$v.rarity.$error"
+                  searchable
+                />
                 <span v-if="$v.rarity.$error" class="text-red-500 text-sm"
                   >Rarity is required</span
                 >
@@ -345,6 +339,7 @@ import { useRouter } from "vue-router";
 import { useVuelidate } from "@vuelidate/core";
 import { required, minValue } from "@vuelidate/validators";
 import { v4 as uuidv4 } from "uuid";
+import Swal from "sweetalert2";
 import AuthService from "@/services/AuthService";
 import Navbar from "@/components/Navbar.vue";
 import CustomSelect from "@/components/CustomSelect.vue";
@@ -353,6 +348,7 @@ export default {
   name: "ForgeMythView",
   components: {
     Navbar,
+    CustomSelect,
   },
   setup() {
     const router = useRouter();
@@ -364,6 +360,74 @@ export default {
       { title: "Properties" },
       { title: "Visual & Effects" },
       { title: "Review" },
+    ];
+
+    // Select options
+    const optionTypeOptions = [
+      {
+        value: "HealthUpgrade",
+        label: "Health Upgrade",
+        description: "Permanently increases maximum health points",
+        icon: `<svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>`,
+      },
+      {
+        value: "StaminaUpgrade",
+        label: "Stamina Upgrade",
+        description: "Permanently increases maximum stamina points",
+        icon: `<svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" /></svg>`,
+      },
+      {
+        value: "HealOnly",
+        label: "Heal Only",
+        description: "Instantly restores health points without permanent bonus",
+        icon: `<svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" /></svg>`,
+      },
+      {
+        value: "StaminaRestore",
+        label: "Stamina Restore",
+        description:
+          "Instantly restores stamina points without permanent bonus",
+        icon: `<svg class="w-5 h-5 text-cyan-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>`,
+      },
+      {
+        value: "DamageIncrease",
+        label: "Damage Increase",
+        description: "Permanently increases attack damage",
+        icon: `<svg class="w-5 h-5 text-orange-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2L3 7v11a1 1 0 001 1h12a1 1 0 001-1V7l-7-5zM6 9.5a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm.5 2.5a.5.5 0 000 1h7a.5.5 0 000-1h-7z" clip-rule="evenodd" /></svg>`,
+      },
+    ];
+
+    const rarityOptions = [
+      {
+        value: "common",
+        label: "Common",
+        rarity: "common",
+        description: "Basic item with standard effects",
+      },
+      {
+        value: "rare",
+        label: "Rare",
+        rarity: "rare",
+        description: "Enhanced item with improved effects",
+      },
+      {
+        value: "epic",
+        label: "Epic",
+        rarity: "epic",
+        description: "Powerful item with significant effects",
+      },
+      {
+        value: "legendary",
+        label: "Legendary",
+        rarity: "legendary",
+        description: "Exceptional item with major effects",
+      },
+      {
+        value: "mythic",
+        label: "Mythic",
+        rarity: "mythic",
+        description: "Ultimate item with extraordinary effects",
+      },
     ];
 
     const formData = reactive({
@@ -490,9 +554,53 @@ export default {
       return colors[rarity] || "text-white";
     };
 
+    const getRarityColorName = (rarity) => {
+      const colors = {
+        common: "gray",
+        rare: "blue",
+        epic: "purple",
+        legendary: "yellow",
+        mythic: "cyan",
+      };
+      return colors[rarity] || "gray";
+    };
+
+    const getOptionTypeLabel = (optionType) => {
+      const labels = {
+        HealthUpgrade: "Health Upgrade",
+        StaminaUpgrade: "Stamina Upgrade",
+        HealOnly: "Heal Only",
+        StaminaRestore: "Stamina Restore",
+        DamageIncrease: "Damage Increase",
+      };
+      return labels[optionType] || optionType;
+    };
+
     const submitForm = async () => {
       await $v.value.$validate();
       if (!$v.value.$invalid) {
+        // Show loading alert
+        Swal.fire({
+          title: "Creating Your Myth...",
+          html: `
+            <div class="flex flex-col items-center space-y-4">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+              <p class="text-gray-600">Forging your legendary item in the cosmic realm...</p>
+            </div>
+          `,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          showConfirmButton: false,
+          background: "#1f2937",
+          color: "#f9fafb",
+          customClass: {
+            popup: "border border-gray-600",
+          },
+        });
+
+        // Simulate creation process (you can replace this with actual API call)
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+
         // Generate stellar transaction ID and icon
         formData.stellarTransactionId = generateTransactionId();
         formData.icon = generateIcon(formData.optionType);
@@ -525,8 +633,43 @@ export default {
         // Output the created item
         console.log("🎮 New Item Created:", JSON.stringify(newItem, null, 2));
 
-        // Show success message (you could add a toast notification here)
-        alert("Item created successfully! Check the console for details.");
+        // Close loading and show success
+        Swal.fire({
+          title: "Myth Created Successfully!",
+          html: `
+            <div class="space-y-4">
+              <p class="text-lg font-semibold text-blue-300">${
+                formData.title
+              }</p>
+              <p class="text-sm text-gray-400">${formData.description}</p>
+              <div class="bg-gray-800 p-3 rounded-lg">
+                <p class="text-sm"><strong>Type:</strong> ${getOptionTypeLabel(
+                  formData.optionType
+                )}</p>
+                <p class="text-sm"><strong>Rarity:</strong> <span class="capitalize text-${getRarityColorName(
+                  formData.rarity
+                )}-400">${formData.rarity}</span></p>
+                <p class="text-sm"><strong>Effect:</strong> ${formData.buff}</p>
+                <p class="text-sm"><strong>Transaction ID:</strong> ${
+                  formData.stellarTransactionId
+                }</p>
+              </div>
+              <p class="text-xs text-gray-500">Your myth has been added to the cosmic registry and will be available for all players!</p>
+            </div>
+          `,
+          icon: "success",
+          confirmButtonText: "Return to Home",
+          confirmButtonColor: "#10b981",
+          background: "#1f2937",
+          color: "#f9fafb",
+          customClass: {
+            popup: "border border-gray-600",
+          },
+        }).then((result) => {
+          if (result.isConfirmed) {
+            router.push("/");
+          }
+        });
       }
     };
 
@@ -541,6 +684,8 @@ export default {
       currentUser,
       currentStep,
       steps,
+      optionTypeOptions,
+      rarityOptions,
       formData,
       $v,
       isCurrentStepValid,
