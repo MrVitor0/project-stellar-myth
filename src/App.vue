@@ -1,14 +1,22 @@
 <template>
   <div id="app" class="min-h-screen bg-twilight-blue">
+    <!-- Navbar global -->
+
     <!-- Conteúdo principal -->
     <main class="flex-1">
+
       <router-view />
     </main>
   </div>
 </template>
 
 <script>
+import Navbar from "./components/Navbar.vue";
+
 export default {
   name: "App",
+  components: {
+    Navbar,
+  },
 };
 </script>

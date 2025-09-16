@@ -7,6 +7,7 @@ import {
   signInWithPopup,
   FacebookAuthProvider,
   sendPasswordResetEmail,
+  onAuthStateChanged as firebaseAuthStateChanged,
 } from "firebase/auth";
 import { auth } from "@/firebase";
 
@@ -160,6 +161,15 @@ export const AuthService = {
   },
 
   /**
+   * Escutar mudanças no estado de autenticação
+   * @param {Function} callback - Função de callback a ser executada quando o estado mudar
+   * @returns {Function} - Função para parar de escutar
+   */
+  onAuthStateChanged(callback) {
+    return firebaseAuthStateChanged(auth, callback);
+  },
+
+  /**
    * Traduz e trata os erros de autenticação do Firebase
    * @param {Error} error - Erro do Firebase
    * @returns {string} - Mensagem de erro traduzida
@@ -169,25 +179,25 @@ export const AuthService = {
     const errorCode = error.code;
     switch (errorCode) {
       case "auth/email-already-in-use":
-        return "Este email já está sendo usado por outra conta.";
+        return "This email is already being used by another account.";
       case "auth/invalid-email":
-        return "Email inválido.";
+        return "Invalid email.";
       case "auth/weak-password":
-        return "Senha fraca. Use pelo menos 6 caracteres.";
+        return "Weak password. Use at least 6 characters.";
       case "auth/user-not-found":
-        return "Usuário não encontrado. Verifique seu email.";
+        return "User not found. Check your email.";
       case "auth/wrong-password":
-        return "Senha incorreta.";
+        return "Incorrect password.";
       case "auth/too-many-requests":
-        return "Acesso temporariamente desativado devido a muitas tentativas falhas. Tente novamente mais tarde.";
+        return "Access temporarily disabled due to too many failed attempts. Try again later.";
       case "auth/user-disabled":
-        return "Esta conta foi desativada.";
+        return "This account has been disabled.";
       case "auth/account-exists-with-different-credential":
-        return "Já existe uma conta com este email usando outro método de login.";
+        return "An account already exists with this email using another login method.";
       case "auth/popup-closed-by-user":
-        return "Operação cancelada pelo usuário.";
+        return "Operation canceled by user.";
       default:
-        return "Ocorreu um erro durante a autenticação. Por favor, tente novamente.";
+        return "An error occurred during authentication. Please try again.";
     }
   },
 };

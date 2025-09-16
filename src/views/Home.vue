@@ -1,27 +1,6 @@
 <template>
   <div class="min-h-screen blockchain-pattern">
-    <!-- Navigation -->
-    <nav class="relative z-50 py-6">
-      <div class="mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center">
-          <div class="text-2xl font-bold text-brazil-yellow">Stellar Myth</div>
-          <div class="hidden md:flex space-x-8">
-            <a
-              href="#"
-              class="text-mid-gray hover:text-brazil-green transition-colors duration-300"
-            >
-              Forge a Myth
-            </a>
-            <router-link
-              to="/login"
-              class="text-mid-gray hover:text-brazil-green transition-colors duration-300"
-            >
-              Join Community
-            </router-link>
-          </div>
-        </div>
-      </div>
-    </nav>
+    <Navbar />
 
     <!-- Hero Section -->
     <div class="relative py-20">
@@ -382,11 +361,13 @@ import UnityParameterTester from "../components/UnityParameterTester.vue";
 import blessingService from "../utils/BlessingService.js";
 import unityService from "../utils/UnityService.js";
 import shopService from "../utils/ShopService.js";
+import Navbar from "../components/Navbar.vue";
 
 export default {
   name: "Home",
   components: {
     HeroContent,
+    Navbar,
     BlessingShowcase,
     BlessingCardsStack,
     LegendForge,

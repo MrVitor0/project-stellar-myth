@@ -1,34 +1,9 @@
 <template>
   <div class="min-h-screen blockchain-pattern">
-    <!-- Navigation -->
-    <nav class="relative z-50 py-6">
-      <div class="mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center">
-          <router-link to="/" class="text-2xl font-bold text-brazil-yellow"
-            >Stellar Myth</router-link
-          >
-          <div class="hidden md:flex space-x-8">
-            <a
-              href="#"
-              class="text-mid-gray hover:text-brazil-green transition-colors duration-300"
-            >
-              Forge a Myth
-            </a>
-            <router-link
-              to="/login"
-              class="text-mid-gray hover:text-brazil-green transition-colors duration-300"
-            >
-              Join Community
-            </router-link>
-          </div>
-        </div>
-      </div>
-    </nav>
-
-    <!-- Auth Container -->
+    <Navbar />
     <div class="flex items-center justify-center min-h-[80vh] px-4">
       <div class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-12">
-        <!-- Coluna da esquerda: Texto e descrição -->
+        <!-- Left column: Text and description -->
         <div class="flex flex-col justify-center">
           <h1
             class="text-4xl md:text-5xl lg:text-6xl font-bold text-brazil-yellow glow-text mb-6"
@@ -114,7 +89,7 @@
           </div>
         </div>
 
-        <!-- Coluna da direita: Formulário de login -->
+        <!-- Right column: Login form -->
         <div class="flex justify-center items-center">
           <AuthForm
             @login-success="handleAuthSuccess"
@@ -123,32 +98,22 @@
         </div>
       </div>
     </div>
-
-    <!-- Footer -->
-    <footer class="text-white py-8 mt-auto">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center">
-          <p class="text-gray-300">
-            © 2025 Project Stellar Myth - Meridian Hack
-          </p>
-        </div>
-      </div>
-    </footer>
   </div>
 </template>
 
 <script>
 import AuthForm from "@/components/AuthForm.vue";
-
+import Navbar from "@/components/Navbar.vue";
 export default {
   name: "LoginView",
   components: {
     AuthForm,
+    Navbar,
   },
   methods: {
     handleAuthSuccess() {
-      // Após login ou cadastro bem-sucedido, redirecione para a página da comunidade
-      this.$router.push("/login");
+      // After successful login or registration, redirect to forge/myth page
+      this.$router.push("/forge/myth");
     },
   },
 };

@@ -7,16 +7,14 @@ import authGuard from "./router/authGuard";
 // Importar as páginas
 import Home from "./views/Home.vue";
 import Login from "./views/Login.vue";
-import Community from "./views/Community.vue";
 
 // Configurar as rotas
 const routes = [
   { path: "/", component: Home },
   { path: "/login", component: Login },
   {
-    path: "/community",
-    component: Community,
-    meta: { requiresAuth: true }, // Esta rota requer autenticação
+    path: "/forge/myth",
+    component: () => import("./views/ForgeMythView.vue"),
   },
 ];
 
