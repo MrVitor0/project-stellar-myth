@@ -292,7 +292,7 @@ export default {
     const balance = ref(0);
     const showDetails = ref(false);
     const showSecretKey = ref(false);
-    const copyButtonText = ref("Copiar Endereço");
+    const copyButtonText = ref("copy address");
     const freighterStatus = ref("checking"); // 'checking', 'available', 'not-installed'
     const walletType = ref(null);
 
@@ -393,14 +393,14 @@ export default {
         if (success) {
           copyButtonText.value = "Copiado!";
           setTimeout(() => {
-            copyButtonText.value = "Copiar Endereço";
+            copyButtonText.value = "copy address";
           }, 2000);
         }
       } catch (error) {
         console.error("Erro ao copiar chave pública:", error);
         copyButtonText.value = "Erro ao copiar";
         setTimeout(() => {
-          copyButtonText.value = "Copiar Endereço";
+          copyButtonText.value = "copy address";
         }, 2000);
       }
     };

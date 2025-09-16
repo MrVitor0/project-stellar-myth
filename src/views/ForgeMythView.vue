@@ -77,15 +77,14 @@
                     clip-rule="evenodd"
                   ></path>
                 </svg>
-                <span class="font-medium">Carteira já conectada</span>
+                <span class="font-medium">Wallet Connected</span>
               </div>
               <p class="text-gray-300">
-                Sua carteira Stellar está conectada e pronta para uso. Verifique
-                os detalhes abaixo e quando estiver pronto, clique no botão para
-                continuar.
+                Your Stellar wallet is connected and ready to use. Review the
+                details below and when ready, click the button to continue.
               </p>
               <BaseButton @click="nextStep" class="mt-4" variant="primary"
-                >Continuar para criação do mito</BaseButton
+                >Continue to myth forge</BaseButton
               >
             </div>
 
