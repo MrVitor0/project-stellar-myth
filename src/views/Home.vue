@@ -12,12 +12,12 @@
             >
               Forge a Myth
             </a>
-            <a
-              href="#"
+            <router-link
+              to="/login"
               class="text-mid-gray hover:text-brazil-green transition-colors duration-300"
             >
               Join Community
-            </a>
+            </router-link>
           </div>
         </div>
       </div>
