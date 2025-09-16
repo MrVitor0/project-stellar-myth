@@ -387,6 +387,7 @@ export default {
       unityService: unityService, // Adiciona referência ao serviço
       shopService: shopService, // Adiciona referência ao serviço da loja
       playerLevel: 1, // Nível do jogador para selecionar opções da loja
+      lastShopOptionIds: [], // IDs das últimas opções da loja para evitar repetição
       heroData: {
         title: {
           prefix: "Forge the Myth. Shape the Game.",
@@ -499,17 +500,87 @@ export default {
         console.error("Unity WebGL loading failed:", error);
         this.handleWebGLError();
       });
+
+      // Setup global function for Unity to request new shop options
+      this.setupShopOptionsRequestHandler();
+    },
+
+    /**
+     * Configura o handler para solicitações de novas opções da loja do Unity
+     */
+    setupShopOptionsRequestHandler() {
+      // Função global que o Unity pode chamar
+      window.requestNewShopOptions = () => {
+        console.log("Unity solicitou novas opções da loja");
+
+        if (unityService.isUnityLoaded()) {
+          // Gera novas opções aleatórias, evitando as últimas selecionadas
+          const shopData = shopService.generateNewShopData(
+            this.playerLevel,
+            this.heroData.stats,
+            this.lastShopOptionIds
+          );
+
+          // Atualiza o controle das últimas opções selecionadas
+          this.lastShopOptionIds = shopData.options.map(
+            (opt) => opt.stellarTransactionId
+          );
+
+          // Envia para o Unity
+          unityService.sendShopOptionsToWebGL(shopData);
+
+          console.log("Novas opções da loja enviadas para Unity:", shopData);
+          console.log("Últimas opções armazenadas:", this.lastShopOptionIds);
+        } else {
+          console.warn(
+            "Unity não está carregado, não é possível enviar novas opções"
+          );
+        }
+      };
+
+      // Também configura uma função de backup para atualização manual
+      window.updateShopOptions = () => {
+        this.updateShopOptions();
+      };
+    },
+
+    /**
+     * Método para atualizar manualmente as opções da loja
+     */
+    updateShopOptions() {
+      if (unityService.isUnityLoaded()) {
+        const shopData = shopService.generateNewShopData(
+          this.playerLevel,
+          this.heroData.stats,
+          this.lastShopOptionIds
+        );
+
+        // Atualiza o controle das últimas opções selecionadas
+        this.lastShopOptionIds = shopData.options.map(
+          (opt) => opt.stellarTransactionId
+        );
+
+        unityService.sendShopOptionsToWebGL(shopData);
+        console.log("Opções da loja atualizadas manualmente:", shopData);
+      }
     },
 
     sendDataToUnity() {
       // Send blessings data to Unity
       unityService.updateBlessings(this.recentBlessings);
 
-      // Generate and send shop options to Unity
-      const shopData = shopService.generateShopData(
+      // Generate and send NEW random shop options to Unity every time
+      const shopData = shopService.generateNewShopData(
         this.playerLevel,
-        this.heroData.stats
+        this.heroData.stats,
+        this.lastShopOptionIds
       );
+
+      // Atualiza o controle das últimas opções selecionadas
+      this.lastShopOptionIds = shopData.options.map(
+        (opt) => opt.stellarTransactionId
+      );
+
       unityService.sendShopOptionsToWebGL(shopData);
 
       // Send player stats to Unity
@@ -521,7 +592,11 @@ export default {
       unityService.setPlayerData(playerData);
 
       // Log das informações enviadas
-      console.log("Dados da loja enviados para Unity:", shopData);
+      console.log(
+        "Novas opções da loja geradas e enviadas para Unity:",
+        shopData
+      );
+      console.log("IDs das opções enviadas:", this.lastShopOptionIds);
       console.log("Dados do jogador enviados:", playerData);
     },
 
@@ -585,14 +660,22 @@ export default {
 
       // Se Unity estiver carregado, envia novos dados da loja
       if (unityService.isUnityLoaded()) {
-        const shopData = shopService.generateShopData(
+        const shopData = shopService.generateNewShopData(
           this.playerLevel,
-          this.heroData.stats
+          this.heroData.stats,
+          this.lastShopOptionIds
         );
+
+        // Atualiza o controle das últimas opções selecionadas
+        this.lastShopOptionIds = shopData.options.map(
+          (opt) => opt.stellarTransactionId
+        );
+
         unityService.sendShopOptionsToWebGL(shopData);
 
         console.log(
-          `Nível do jogador atualizado para ${this.playerLevel}, novas opções da loja enviadas`
+          `Nível do jogador atualizado para ${this.playerLevel}, novas opções da loja enviadas`,
+          shopData
         );
       }
     },

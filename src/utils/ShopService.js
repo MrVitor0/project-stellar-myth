@@ -297,6 +297,92 @@ class ShopService {
       stats: this.getShopStats(),
     };
   }
+
+  /**
+   * Força a geração de 3 opções completamente aleatórias
+   * Garantindo que sempre sejam diferentes da última seleção
+   * @param {number} playerLevel - Nível do jogador
+   * @param {Array} lastSelectedIds - IDs das últimas opções selecionadas (para evitar repetição)
+   * @returns {Array} Array com 3 opções diferentes
+   */
+  getNewRandomOptions(playerLevel = 1, lastSelectedIds = []) {
+    let availableOptions = [...this.shopOptions];
+
+    // Remove as últimas opções selecionadas para garantir variedade
+    if (lastSelectedIds && lastSelectedIds.length > 0) {
+      availableOptions = availableOptions.filter(
+        (option) => !lastSelectedIds.includes(option.stellarTransactionId)
+      );
+    }
+
+    // Se sobraram menos de 3 opções após filtrar, usa todas as opções disponíveis
+    if (availableOptions.length < 3) {
+      availableOptions = [...this.shopOptions];
+    }
+
+    const selectedOptions = [];
+    const adjustedWeights = this.getAdjustedWeights(playerLevel);
+
+    // Seleciona 3 opções diferentes
+    while (selectedOptions.length < 3 && availableOptions.length > 0) {
+      const selectedRarity = this.selectRandomRarity(adjustedWeights);
+      const optionsOfRarity = availableOptions.filter(
+        (option) => option.rarity === selectedRarity
+      );
+
+      if (optionsOfRarity.length > 0) {
+        const randomIndex = Math.floor(Math.random() * optionsOfRarity.length);
+        const selectedOption = optionsOfRarity[randomIndex];
+
+        selectedOptions.push(selectedOption);
+
+        // Remove a opção selecionada para evitar duplicatas nesta seleção
+        const originalIndex = availableOptions.indexOf(selectedOption);
+        availableOptions.splice(originalIndex, 1);
+      }
+    }
+
+    // Se não conseguiu 3 opções, preenche com opções aleatórias restantes
+    while (selectedOptions.length < 3 && availableOptions.length > 0) {
+      const randomIndex = Math.floor(Math.random() * availableOptions.length);
+      selectedOptions.push(availableOptions[randomIndex]);
+      availableOptions.splice(randomIndex, 1);
+    }
+
+    console.log(
+      "ShopService: Novas opções aleatórias geradas:",
+      selectedOptions.map((opt) => opt.optionName)
+    );
+    return selectedOptions;
+  }
+
+  /**
+   * Gera dados completos da loja com opções completamente novas
+   * @param {number} playerLevel - Nível do jogador
+   * @param {Object} playerStats - Estatísticas do jogador
+   * @param {Array} lastSelectedIds - IDs das últimas opções para evitar repetição
+   * @returns {Object} Dados completos da loja com opções novas
+   */
+  generateNewShopData(playerLevel = 1, playerStats = {}, lastSelectedIds = []) {
+    const randomOptions = this.getNewRandomOptions(
+      playerLevel,
+      lastSelectedIds
+    );
+    const formattedOptions = this.formatOptionsForUnity(randomOptions);
+
+    return {
+      options: formattedOptions,
+      playerLevel: playerLevel,
+      playerStats: playerStats,
+      shopMetadata: {
+        version: this.metadata.version,
+        timestamp: new Date().toISOString(),
+        sessionId: this.generateSessionId(),
+        totalAvailableOptions: this.shopOptions.length,
+        selectionType: "forced_new_random",
+      },
+    };
+  }
 }
 
 // Cria e exporta uma instância singleton

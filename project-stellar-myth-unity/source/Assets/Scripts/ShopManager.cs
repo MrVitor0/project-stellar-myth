@@ -111,7 +111,10 @@ public class ShopManager : MonoBehaviour
             return;
         }
         
-        // Verifica se temos opções disponíveis
+        // Solicita novas opções aleatórias do WebGL antes de abrir a loja
+        RequestNewShopOptions();
+        
+        // Verifica se temos opções disponíveis (pode ser do cache ou opções configuradas manualmente)
         if (availableOptions == null || availableOptions.Length == 0)
         {
             Debug.LogWarning("ShopManager: Tentou abrir loja sem opções disponíveis");
@@ -152,6 +155,30 @@ public class ShopManager : MonoBehaviour
         if (debugMode)
         {
             Debug.Log("ShopManager: Loja aberta!");
+        }
+    }
+    
+    /// <summary>
+    /// Solicita novas opções aleatórias da loja do WebGL
+    /// </summary>
+    private void RequestNewShopOptions()
+    {
+        try
+        {
+            // Envia mensagem para o WebGL solicitando novas opções aleatórias
+            Application.ExternalCall("requestNewShopOptions");
+            
+            if (debugMode)
+            {
+                Debug.Log("ShopManager: Solicitadas novas opções da loja do WebGL");
+            }
+        }
+        catch (System.Exception e)
+        {
+            if (debugMode)
+            {
+                Debug.LogWarning($"ShopManager: Não foi possível solicitar novas opções do WebGL: {e.Message}");
+            }
         }
     }
     
@@ -729,12 +756,36 @@ public class ShopManager : MonoBehaviour
         
         try
         {
-            // Tenta deserializar as opções recebidas
-            // Aqui você pode implementar a lógica para converter o JSON em ShopOption[]
-            // e atualizar as opções disponíveis na loja
+            // Parse do JSON recebido
+            var shopData = JsonUtility.FromJson<WebGLShopData>(optionsData);
             
-            // Por enquanto, apenas registra que as opções foram recebidas
-            // TODO: Implementar deserialização e atualização das opções conforme necessário
+            if (shopData != null && shopData.options != null && shopData.options.Length > 0)
+            {
+                // Converte as opções WebGL para ShopOption[]
+                availableOptions = new ShopOption[shopData.options.Length];
+                
+                for (int i = 0; i < shopData.options.Length; i++)
+                {
+                    availableOptions[i] = ConvertWebGLOptionToShopOption(shopData.options[i]);
+                }
+                
+                if (debugMode)
+                {
+                    Debug.Log($"ShopManager: {availableOptions.Length} opções atualizadas a partir do WebGL");
+                }
+                
+                // Se a loja estiver aberta, regenera as opções para usar as novas
+                if (isShopOpen)
+                {
+                    GenerateRandomOptions();
+                    UpdateShopUI();
+                    UpdateShopTexts();
+                }
+            }
+            else
+            {
+                Debug.LogWarning("ShopManager: Dados da loja recebidos do WebGL são inválidos ou vazios");
+            }
         }
         catch (System.Exception e)
         {
@@ -742,11 +793,103 @@ public class ShopManager : MonoBehaviour
         }
     }
     
+    /// <summary>
+    /// Converte uma opção WebGL para ShopOption
+    /// </summary>
+    private ShopOption ConvertWebGLOptionToShopOption(WebGLShopOption webglOption)
+    {
+        var shopOption = new ShopOption();
+        
+        shopOption.optionName = webglOption.optionName ?? "Opção";
+        shopOption.description = webglOption.description ?? "Descrição";
+        shopOption.stellarTransactionId = webglOption.stellarTransactionId ?? "";
+        shopOption.title = webglOption.title ?? "";
+        shopOption.buff = webglOption.buff ?? "";
+        shopOption.value = webglOption.value;
+        shopOption.rarity = webglOption.rarity ?? "common";
+        shopOption.cost = webglOption.cost;
+        shopOption.isSpecial = webglOption.isSpecial;
+        
+        // Converte optionType string para enum
+        if (System.Enum.TryParse<ShopOptionType>(webglOption.optionType, out ShopOptionType optionType))
+        {
+            shopOption.optionType = optionType;
+        }
+        else
+        {
+            shopOption.optionType = ShopOptionType.HealthUpgrade; // Default
+        }
+        
+        // Se tem efeitos especiais, aplica
+        if (webglOption.specialEffects != null)
+        {
+            shopOption.healthBonus = webglOption.specialEffects.healthBonus;
+            shopOption.staminaBonus = webglOption.specialEffects.staminaBonus;
+            shopOption.damageBonus = webglOption.specialEffects.damageBonus;
+        }
+        
+        return shopOption;
+    }
+    
     // Propriedades públicas
     /// <summary>
     /// Indica se a loja está atualmente aberta
     /// </summary>
     public bool IsShopOpen => isShopOpen;
+}
+
+/// <summary>
+/// Classe para deserializar dados da loja recebidos do WebGL
+/// </summary>
+[System.Serializable]
+public class WebGLShopData
+{
+    public WebGLShopOption[] options;
+    public int playerLevel;
+    public WebGLShopMetadata shopMetadata;
+}
+
+/// <summary>
+/// Classe para deserializar opções da loja recebidas do WebGL
+/// </summary>
+[System.Serializable]
+public class WebGLShopOption
+{
+    public string optionName;
+    public string description;
+    public string stellarTransactionId;
+    public string title;
+    public string buff;
+    public string icon;
+    public string optionType;
+    public float value;
+    public string rarity;
+    public float cost;
+    public bool isSpecial;
+    public WebGLSpecialEffects specialEffects;
+}
+
+/// <summary>
+/// Classe para efeitos especiais de opções WebGL
+/// </summary>
+[System.Serializable]
+public class WebGLSpecialEffects
+{
+    public float healthBonus;
+    public float staminaBonus;
+    public float damageBonus;
+}
+
+/// <summary>
+/// Classe para metadata da loja WebGL
+/// </summary>
+[System.Serializable]
+public class WebGLShopMetadata
+{
+    public string version;
+    public string timestamp;
+    public string sessionId;
+    public int totalAvailableOptions;
 }
 
 /// <summary>

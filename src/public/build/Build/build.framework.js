@@ -1283,10 +1283,10 @@ function dbg(text) {
 // === Body ===
 
 var ASM_CONSTS = {
-  8262880: () => { Module['emscripten_get_now_backup'] = performance.now; },  
- 8262935: ($0) => { performance.now = function() { return $0; }; },  
- 8262983: ($0) => { performance.now = function() { return $0; }; },  
- 8263031: () => { performance.now = Module['emscripten_get_now_backup']; }
+  8263824: () => { Module['emscripten_get_now_backup'] = performance.now; },  
+ 8263879: ($0) => { performance.now = function() { return $0; }; },  
+ 8263927: ($0) => { performance.now = function() { return $0; }; },  
+ 8263975: () => { performance.now = Module['emscripten_get_now_backup']; }
 };
 
 
@@ -2017,6 +2017,19 @@ var ASM_CONSTS = {
   		}
   		return _JS_DOM_UnityCanvasSelector.ptr;
   	}
+
+  
+  function _JS_Eval_EvalJS(ptr)
+  {
+  	var str = UTF8ToString(ptr);
+  	try {
+  		eval (str);
+  	}
+  	catch (exception)
+  	{
+  		console.error(exception);
+  	}
+  }
 
   
   function _JS_Eval_OpenURL(ptr)
@@ -16525,6 +16538,7 @@ var wasmImports = {
   "JS_Cursor_SetShow": _JS_Cursor_SetShow,
   "JS_DOM_MapViewportCoordinateToElementLocalCoordinate": _JS_DOM_MapViewportCoordinateToElementLocalCoordinate,
   "JS_DOM_UnityCanvasSelector": _JS_DOM_UnityCanvasSelector,
+  "JS_Eval_EvalJS": _JS_Eval_EvalJS,
   "JS_Eval_OpenURL": _JS_Eval_OpenURL,
   "JS_FileSystem_Initialize": _JS_FileSystem_Initialize,
   "JS_FileSystem_Sync": _JS_FileSystem_Sync,
