@@ -372,6 +372,7 @@
         </p>
         <div class="flex flex-col md:flex-row gap-4 justify-center">
           <button
+            @click="$router.push('/forge/myth')"
             class="px-8 py-4 bg-gradient-to-r from-brazil-yellow to-brazil-yellow/80 text-dark-night font-bold rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-brazil-yellow/20 flex items-center justify-center"
           >
             <svg
@@ -392,6 +393,7 @@
           </button>
 
           <button
+            @click="launchGame"
             class="px-8 py-4 bg-gradient-to-r from-mystic-cyan/90 to-mystic-cyan/70 text-dark-night font-bold rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-mystic-cyan/20 flex items-center justify-center"
           >
             <svg
@@ -525,6 +527,9 @@ export default {
     this.removeFullscreenListeners();
   },
   methods: {
+    launchGame() {
+      window.open('/webgl/index.html', '_blank', 'fullscreen=yes');
+    },
     async loadRecentBlessings() {
       try {
         // Carregar itens do contrato Soroban

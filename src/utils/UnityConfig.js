@@ -5,7 +5,7 @@
 
 export const UnityConfig = {
   // Build paths
-  buildPath: "src/public/build/Build",
+  buildPath: "/webgl/Build",
 
   // Unity instance configuration
   config: {

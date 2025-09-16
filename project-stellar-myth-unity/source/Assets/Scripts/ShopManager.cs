@@ -50,10 +50,6 @@ public class ShopManager : MonoBehaviour
         }
         else
         {
-            if (debugMode)
-            {
-                Debug.Log("ShopManager: Instância já existe nesta cena, destruindo duplicata");
-            }
             Destroy(gameObject);
         }
     }

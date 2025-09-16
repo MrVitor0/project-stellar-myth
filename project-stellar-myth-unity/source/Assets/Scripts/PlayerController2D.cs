@@ -83,10 +83,6 @@ public class PlayerController2D : MonoBehaviour
         {
             combatAttributes = combatController.Attributes;
         }
-        else
-        {
-            Debug.LogWarning("PlayerController2D: Não encontrou ICombatController! Dash não consumirá stamina.");
-        }
     }
 
     private void Update()
@@ -184,11 +180,9 @@ public class PlayerController2D : MonoBehaviour
             bool staminaConsumed = combatAttributes.ConsumeStamina(dashStaminaCost);
             if (!staminaConsumed)
             {
-                Debug.Log("PlayerController2D: Stamina insuficiente para dash!");
                 return; // Não executa dash se não conseguiu consumir stamina
             }
             
-            Debug.Log($"PlayerController2D: Dash executado! Stamina restante: {combatAttributes.CurrentStamina:F1}");
         }
         
         isExecutingDash = true;
@@ -550,7 +544,6 @@ public class PlayerController2D : MonoBehaviour
             animator.SetFloat("Velocity", 0f);
         }
         
-        Debug.Log("PlayerController2D: Player bloqueado - sem movimentos, ataques ou dash!");
     }
     
     /// <summary>
@@ -559,7 +552,6 @@ public class PlayerController2D : MonoBehaviour
     public void UnlockPlayer()
     {
         isPlayerLocked = false;
-        Debug.Log("PlayerController2D: Player desbloqueado - movimentos liberados!");
     }
     
     /// <summary>

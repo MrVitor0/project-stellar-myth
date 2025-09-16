@@ -124,10 +124,7 @@ namespace EnemySystem.Pathfinding
             {
                 target = player.transform;
             }
-            else
-            {
-                Debug.LogWarning($"[EnemyPathfinder] Player with tag {playerTag} not found!");
-            }
+           
         }
 
         #endregion
@@ -269,7 +266,6 @@ namespace EnemySystem.Pathfinding
         {
             if (!IsInAttackRange()) return;
 
-            Debug.Log($"[ISHURT] {combatController.IsHurt} está em alcance de ataque.");
             
             // Verifica se o inimigo está tomando dano (não pode atacar enquanto sendo ferido)
             if (combatController != null && combatController.IsHurt)

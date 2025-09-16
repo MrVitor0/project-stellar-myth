@@ -37,10 +37,6 @@ namespace CombatSystem
             
             // Configura layer do jogador como alvo
             targetLayers = LayerMask.GetMask("Player");
-            
-            Debug.Log($"[ENEMY COMBAT SETUP] {gameObject.name} - EnemyCombatController inicializado!");
-            Debug.Log($"[ENEMY COMBAT SETUP] Target Layers: {targetLayers.value}");
-            Debug.Log($"[ENEMY COMBAT SETUP] Stamina Cost: {staminaCostPerAttack}");
         }
         
         protected override void Start()
@@ -50,31 +46,15 @@ namespace CombatSystem
             // Força a criação de atributos se não existirem
             if (attributes == null)
             {
-                Debug.LogWarning($"[ENEMY COMBAT SETUP] {gameObject.name} - Attributes era null, criando novo!");
                 attributes = new CombatAttributes();
                 attributes.Initialize();
             }
-            
-            Debug.Log($"[ENEMY COMBAT SETUP] {gameObject.name} - Start chamado");
-            Debug.Log($"[ENEMY COMBAT SETUP] Attributes existe: {attributes != null}");
-            if (attributes != null)
-            {
-                Debug.Log($"[ENEMY COMBAT SETUP] Max Health: {attributes.MaxHealth}");
-                Debug.Log($"[ENEMY COMBAT SETUP] Current Health: {attributes.CurrentHealth}");
-                Debug.Log($"[ENEMY COMBAT SETUP] Max Stamina: {attributes.MaxStamina}");
-                Debug.Log($"[ENEMY COMBAT SETUP] Current Stamina: {attributes.CurrentStamina}");
-                Debug.Log($"[ENEMY COMBAT SETUP] Attack Range: {attributes.AttackRange}");
-                Debug.Log($"[ENEMY COMBAT SETUP] Attack Power: {attributes.AttackPower}");
-                Debug.Log($"[ENEMY COMBAT SETUP] Attack Speed: {attributes.AttackSpeed}");
-            }
-            Debug.Log($"[ENEMY COMBAT SETUP] Attack Point: {attackPoint?.position}");
-            
+  
             // Conecta eventos do CombatController com callbacks do Enemy
             if (enemy != null)
             {
                 // CombatController notifica Enemy sobre morte (única fonte de verdade)
                 attributes.OnDeath += () => enemy.Die();
-                Debug.Log($"[ENEMY COMBAT SETUP] Enemy component encontrado e conectado");
             }
             else
             {
@@ -277,16 +257,9 @@ namespace CombatSystem
         // Método público para ser chamado pelo pathfinding quando em range de ataque
         public bool IsInAttackRange(Vector2 targetPosition)
         {
-            if (attributes == null)
-            {
-                Debug.LogError($"[RANGE CHECK] ❌ {gameObject.name} - Attributes é NULL no IsInAttackRange!");
-                return false;
-            }
             
             float distance = Vector2.Distance(transform.position, targetPosition);
             bool inRange = distance <= attributes.AttackRange;
-            
-            Debug.Log($"[RANGE CHECK] {gameObject.name} - Distance: {distance:F2}, Attack Range: {attributes.AttackRange}, In Range: {inRange}");
             
             return inRange;
         }
@@ -294,37 +267,12 @@ namespace CombatSystem
         // Método público para o pathfinding executar ataque
         public void ExecuteAttack()
         {
-            Debug.Log($"[ENEMY ATTACK] ⚔️  {gameObject.name} - ExecuteAttack CHAMADO!");
-            Debug.Log($"[ENEMY ATTACK] debugEnemyCombat: {debugEnemyCombat}");
-            
-            if (debugEnemyCombat)
-            {
-                Debug.Log($"[ENEMY ATTACK] {gameObject.name} - ExecuteAttack chamado");
-                Debug.Log($"[ENEMY ATTACK] CanAttack: {CanAttack}");
-                Debug.Log($"[ENEMY ATTACK] IsAlive: {(attributes?.IsAlive()).ToString()}");
-                Debug.Log($"[ENEMY ATTACK] Current Health: {attributes?.CurrentHealth}");
-                Debug.Log($"[ENEMY ATTACK] Current Stamina: {attributes?.CurrentStamina}");
-                Debug.Log($"[ENEMY ATTACK] Attack Power: {attributes?.AttackPower}");
-                Debug.Log($"[ENEMY ATTACK] Attack Range: {attributes?.AttackRange}");
-                Debug.Log($"[ENEMY ATTACK] IsAttacking: {isAttacking}");
-                Debug.Log($"[ENEMY ATTACK] Time since last attack: {Time.time - lastAttackTime}");
-                Debug.Log($"[ENEMY ATTACK] Attack cooldown: {(attributes != null ? 1f / attributes.AttackSpeed : 0f)}");
-            }
+        
             
             if (CanAttack)
             {
                 Debug.Log($"[ENEMY ATTACK] ✅ {gameObject.name} executando ataque!");
                 Attack();
-            }
-            else
-            {
-                Debug.Log($"[ENEMY ATTACK] ❌ {gameObject.name} NÃO PODE atacar!");
-                
-                // Vamos debuggar por que não pode atacar
-                Debug.Log($"[ENEMY ATTACK DEBUG] isAttacking: {isAttacking}");
-                Debug.Log($"[ENEMY ATTACK DEBUG] attributes != null: {attributes != null}");
-                Debug.Log($"[ENEMY ATTACK DEBUG] IsAlive: {(attributes?.IsAlive()).ToString()}");
-                Debug.Log($"[ENEMY ATTACK DEBUG] Time check: {Time.time} >= {lastAttackTime + (attributes != null ? 1f / attributes.AttackSpeed : 1f)}");
             }
         }
         

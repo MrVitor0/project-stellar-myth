@@ -38,8 +38,7 @@ namespace EnemySystem
             
             if (combatController == null)
             {
-                Debug.LogError($"Enemy '{gameObject.name}' PRECISA de um ICombatController (EnemyCombatController)! " +
-                              "O sistema legado não é mais suportado.");
+             
             }
         }
 
@@ -62,7 +61,6 @@ namespace EnemySystem
         {
             if (combatController == null)
             {
-                Debug.LogError($"Enemy '{gameObject.name}' não pode receber dano sem CombatController!");
                 return;
             }
 
@@ -98,7 +96,6 @@ namespace EnemySystem
         {
             float currentHP = Health;
             float maxHP = MaxHealth;
-            Debug.Log($"{gameObject.name} took {damage} damage. Health: {currentHP}/{maxHP}");
         }
 
         /// <summary>
@@ -106,7 +103,6 @@ namespace EnemySystem
         /// </summary>
         protected virtual void OnDeath()
         {
-            Debug.Log($"{gameObject.name} died!");
             
             // Aqui você pode adicionar efeitos de morte, drop de itens, etc.
             // Por exemplo:
@@ -123,7 +119,6 @@ namespace EnemySystem
         {
             float currentHP = Health;
             float maxHP = MaxHealth;
-            Debug.Log($"{gameObject.name} healed {healAmount}. Health: {currentHP}/{maxHP}");
         }
 
     

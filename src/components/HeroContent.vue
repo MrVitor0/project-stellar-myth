@@ -13,6 +13,7 @@
 
       <div class="cta-buttons">
         <button
+          @click="launchGame"
           class="btn-primary inline-flex items-center justify-center group"
         >
           <component
@@ -23,6 +24,7 @@
         </button>
 
         <button
+          @click="$router.push('/forge/myth')"
           class="btn-secondary group inline-flex items-center justify-center"
         >
           {{ secondaryButton.text }}
@@ -50,6 +52,11 @@ export default {
     Users,
     Coins,
     Trophy,
+  },
+  methods: {
+    launchGame() {
+      window.open('/webgl/index.html', '_blank', 'fullscreen=yes');
+    }
   },
   props: {
     title: {

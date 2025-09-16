@@ -39,17 +39,9 @@ public class GameOverTester : MonoBehaviour
             if (combat != null)
             {
                 combat.TakeDamage(testDamageAmount, Vector2.zero);
-                Debug.Log($"GameOverTester: Causando {testDamageAmount} de dano ao player! Vida atual: {combat.Attributes.CurrentHealth}");
-            }
-            else
-            {
-                Debug.LogWarning("GameOverTester: Player não tem sistema de combate!");
             }
         }
-        else
-        {
-            Debug.LogWarning("GameOverTester: Player não encontrado!");
-        }
+     
     }
     
     /// <summary>
@@ -66,17 +58,9 @@ public class GameOverTester : MonoBehaviour
                 // Causa dano igual à vida máxima para garantir morte
                 float maxHealth = combat.Attributes.MaxHealth;
                 combat.TakeDamage(maxHealth + 10f, Vector2.zero);
-                Debug.Log("GameOverTester: Player morto instantaneamente! Game Over deve aparecer.");
-            }
-            else
-            {
-                Debug.LogWarning("GameOverTester: Player não tem sistema de combate!");
             }
         }
-        else
-        {
-            Debug.LogWarning("GameOverTester: Player não encontrado!");
-        }
+    
     }
     
     void OnGUI()

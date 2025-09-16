@@ -39,10 +39,7 @@ public class CameraFollowController : MonoBehaviour
     {
         // Obtém o componente da câmera
         cameraComponent = GetComponent<Camera>();
-        if (cameraComponent == null)
-        {
-            Debug.LogError("CameraFollowController: Componente Camera não encontrado!");
-        }
+     
         
         // Se nenhum target foi definido, tenta encontrar o jogador automaticamente
         if (target == null)
@@ -53,10 +50,7 @@ public class CameraFollowController : MonoBehaviour
                 target = player.transform;
                 targetRigidbody = player.GetComponent<Rigidbody2D>();
             }
-            else
-            {
-                Debug.LogWarning("CameraFollowController: Nenhum target definido e PlayerController2D não encontrado na cena!");
-            }
+          
         }
         else
         {
@@ -260,7 +254,6 @@ public class CameraFollowController : MonoBehaviour
             useColliderBounds = false;
             UpdateBoundaries();
             
-            Debug.Log($"CameraFollowController: Boundaries definidos automaticamente - Min: {minBounds}, Max: {maxBounds}");
         }
     }
     

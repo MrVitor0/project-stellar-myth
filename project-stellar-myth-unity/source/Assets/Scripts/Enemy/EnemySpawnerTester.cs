@@ -191,27 +191,22 @@ namespace EnemySystem
 
         public void OnWaveStarted()
         {
-            Debug.Log("[Tester] Wave Started Event Received");
         }
 
         public void OnWaveCompleted()
         {
-            Debug.Log("[Tester] Wave Completed Event Received");
         }
 
         public void OnAllWavesCompleted()
         {
-            Debug.Log("[Tester] All Waves Completed Event Received");
         }
 
         public void OnEnemySpawned(int totalEnemies)
         {
-            Debug.Log($"[Tester] Enemy Spawned. Total: {totalEnemies}");
         }
 
         public void OnEnemyKilled(int remainingEnemies)
         {
-            Debug.Log($"[Tester] Enemy Killed. Remaining: {remainingEnemies}");
         }
 
         #endregion

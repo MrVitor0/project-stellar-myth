@@ -131,19 +131,16 @@ public class CameraManager : MonoBehaviour
             case CameraMode.FollowPlayer:
                 if (followController != null)
                     followController.enabled = true;
-                Debug.Log("Modo da câmera: Seguindo Jogador");
                 break;
                 
             case CameraMode.Fixed:
                 if (followController != null)
                     followController.enabled = false;
-                Debug.Log("Modo da câmera: Fixa");
                 break;
                 
             case CameraMode.Free:
                 if (followController != null)
                     followController.enabled = false;
-                Debug.Log("Modo da câmera: Livre");
                 break;
         }
     }

@@ -412,10 +412,7 @@ namespace EnemySystem
         /// </summary>
         private void Log(string message)
         {
-            if (debugMode)
-            {
-                Debug.Log($"[EnemySpawner] {message}");
-            }
+        
         }
 
         /// <summary>
@@ -423,7 +420,6 @@ namespace EnemySystem
         /// </summary>
         private void LogError(string message)
         {
-            Debug.LogError($"[EnemySpawner] {message}");
         }
 
         #endregion

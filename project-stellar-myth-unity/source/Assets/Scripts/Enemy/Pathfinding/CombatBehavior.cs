@@ -45,7 +45,6 @@ namespace EnemySystem.Pathfinding
                     _ => "ataque"
                 };
 
-                Debug.Log($"[Enemy Combat] Realizando {attackType}");
             }
 
             lastAttackTime = Time.time;

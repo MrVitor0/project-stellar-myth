@@ -98,10 +98,7 @@ public class GameController : MonoBehaviour
             advancedUIController = FindObjectOfType<AdvancedUIController>();
         }
         
-        if (debugMode)
-        {
-            Debug.Log($"GameController: Found references - Player: {player != null}, Canvas: {gameCanvas != null}, UI: {(useAdvancedUI ? advancedUIController != null : uiController != null)}");
-        }
+ 
     }
     
     private void SetupGameSystems()
@@ -118,35 +115,24 @@ public class GameController : MonoBehaviour
                 if (playerAttributes != null)
                 {
                     playerAttributes.Initialize();
-                    Debug.Log($"GameController: Atributos inicializados - Health: {playerAttributes.CurrentHealth}/{playerAttributes.MaxHealth}, Stamina: {playerAttributes.CurrentStamina}/{playerAttributes.MaxStamina}");
                 }
                 
                 SubscribeToPlayerEvents();
             }
-            else if (debugMode)
-            {
-                Debug.LogWarning("GameController: Player não tem ICombatController!");
-            }
+          
         }
         
         // Setup UI system
         SetupUISystem();
         
-        if (debugMode)
-        {
-            Debug.Log("GameController: Sistemas inicializados com sucesso!");
-        }
+      
     }
     
     private void SetupUISystem()
     {
         // Both UI controllers auto-initialize, so we don't need to do much here
         // This method is here for future expansion
-        
-        if (debugMode)
-        {
-            Debug.Log($"GameController: UI System setup complete. Using {(useAdvancedUI ? "Advanced" : "Basic")} UI");
-        }
+
     }
     
     private void SubscribeToPlayerEvents()
@@ -154,14 +140,6 @@ public class GameController : MonoBehaviour
         if (playerAttributes != null)
         {
             playerAttributes.OnDeath += OnPlayerDeath;
-            
-            if (debugMode)
-            {
-                playerAttributes.OnHealthChanged += (current, max) => 
-                    Debug.Log($"Player Health: {current:F1}/{max:F1}");
-                playerAttributes.OnStaminaChanged += (current, max) => 
-                    Debug.Log($"Player Stamina: {current:F1}/{max:F1}");
-            }
         }
     }
     
@@ -183,11 +161,6 @@ public class GameController : MonoBehaviour
     
     private void OnPlayerDeath()
     {
-        if (debugMode)
-        {
-            Debug.Log("GameController: Player morreu!");
-        }
-        
         // Notifica o UIController apropriado para mostrar a tela de Game Over
         if (useAdvancedUI && advancedUIController != null)
         {
@@ -197,10 +170,7 @@ public class GameController : MonoBehaviour
         {
             uiController.ShowGameOverScreen();
         }
-        else
-        {
-            Debug.LogWarning("GameController: Nenhum UIController encontrado para mostrar Game Over!");
-        }
+      
         
         HandlePlayerDeath();
     }
@@ -209,11 +179,6 @@ public class GameController : MonoBehaviour
     {
         // Lógica adicional de morte do player
         isPlayerAlive = false;
-        
-        if (debugMode)
-        {
-            Debug.Log("GameController: Handling player death - Game Over!");
-        }
         
         // Aqui você pode adicionar outras lógicas como:
         // - Parar música de fundo
@@ -266,11 +231,6 @@ public class GameController : MonoBehaviour
             if (advancedUIController != null) advancedUIController.enabled = false;
             if (uiController != null) uiController.enabled = true;
         }
-        
-        if (debugMode)
-        {
-            Debug.Log($"GameController: Switched to {(useAdvancedUI ? "Advanced" : "Basic")} UI");
-        }
     }
     
     public void PauseGame()
@@ -292,10 +252,7 @@ public class GameController : MonoBehaviour
         {
             ShopManager.Instance.OnGameRestart();
             
-            if (debugMode)
-            {
-                Debug.Log("GameController: Estado do ShopManager resetado");
-            }
+        
         }
         
         // Reseta também o sistema persistente
@@ -303,10 +260,7 @@ public class GameController : MonoBehaviour
         {
             ShopPersistentData.Instance.ResetShopState();
             
-            if (debugMode)
-            {
-                Debug.Log("GameController: Sistema persistente da loja resetado");
-            }
+      
         }
         
         Time.timeScale = 1f;
@@ -320,11 +274,7 @@ public class GameController : MonoBehaviour
     /// </summary>
     public void ForceReinitialize()
     {
-        if (debugMode)
-        {
-            Debug.Log("GameController: Forçando reinicialização...");
-        }
-        
+  
         // Reinicializa referências
         FindMissingReferences();
         SetupGameSystems();
@@ -341,7 +291,6 @@ public class GameController : MonoBehaviour
             uiController.enabled = true;
         }
         
-        Debug.Log("GameController: Reinicialização forçada concluída!");
     }
     
     // Properties for external access

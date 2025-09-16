@@ -86,7 +86,6 @@ public class AdvancedUIController : MonoBehaviour
         if (playerController == null)
         {
             playerController = FindObjectOfType<PlayerController2D>();
-            Debug.Log("AdvancedUIController: Player encontrado automaticamente!");
         }
         
         if (playerController != null)
@@ -105,7 +104,6 @@ public class AdvancedUIController : MonoBehaviour
                 SubscribeToEvents();
                 InitializeSliders();
                 
-                Debug.Log("AdvancedUIController: Sistema de combate conectado com sucesso!");
             }
         }
         
@@ -161,7 +159,6 @@ public class AdvancedUIController : MonoBehaviour
             healthSlider.value = playerAttributes.CurrentHealth;
             targetHealthValue = playerAttributes.CurrentHealth;
             
-            Debug.Log($"AdvancedUIController: Health Slider inicializado - Value: {playerAttributes.CurrentHealth}/{playerAttributes.MaxHealth}");
         }
         
         if (staminaSlider != null)
@@ -171,7 +168,6 @@ public class AdvancedUIController : MonoBehaviour
             staminaSlider.value = playerAttributes.CurrentStamina;
             targetStaminaValue = playerAttributes.CurrentStamina;
             
-            Debug.Log($"AdvancedUIController: Stamina Slider inicializado - Value: {playerAttributes.CurrentStamina}/{playerAttributes.MaxStamina}");
         }
         
         UpdateTextDisplays();
@@ -367,7 +363,6 @@ public class AdvancedUIController : MonoBehaviour
             restartButton.onClick.AddListener(RestartGame);
         }
         
-        Debug.Log("AdvancedUIController: Game Over UI inicializada!");
     }
     
     /// <summary>
@@ -375,7 +370,6 @@ public class AdvancedUIController : MonoBehaviour
     /// </summary>
     private void OnPlayerDeath()
     {
-        Debug.Log("AdvancedUIController: Player morreu! Exibindo tela de Game Over...");
         ShowGameOverScreen();
     }
     
@@ -394,11 +388,9 @@ public class AdvancedUIController : MonoBehaviour
             // Bloqueia movimentos e ataques do player
             LockPlayerControls();
             
-            Debug.Log("AdvancedUIController: Tela de Game Over exibida!");
         }
         else
         {
-            Debug.LogWarning("AdvancedUIController: Game Over Panel não está configurado!");
         }
     }
     
@@ -417,7 +409,6 @@ public class AdvancedUIController : MonoBehaviour
             // Desbloqueia controles do player (caso necessário)
             UnlockPlayerControls();
             
-            Debug.Log("AdvancedUIController: Tela de Game Over escondida!");
         }
     }
     
@@ -426,20 +417,17 @@ public class AdvancedUIController : MonoBehaviour
     /// </summary>
     public void RestartGame()
     {
-        Debug.Log("AdvancedUIController: Reiniciando o jogo...");
         
         // Reseta o estado do ShopManager antes de recarregar a cena
         if (ShopManager.Instance != null)
         {
             ShopManager.Instance.OnGameRestart();
-            Debug.Log("AdvancedUIController: Estado do ShopManager resetado");
         }
         
         // Reseta também o sistema persistente
         if (ShopPersistentData.Instance != null)
         {
             ShopPersistentData.Instance.ResetShopState();
-            Debug.Log("AdvancedUIController: Sistema persistente da loja resetado");
         }
         
         // Restaura o time scale antes de recarregar a cena
@@ -470,7 +458,6 @@ public class AdvancedUIController : MonoBehaviour
             }
         }
         
-        Debug.Log("AdvancedUIController: Controles do player bloqueados - sem movimento, dash ou ataque!");
     }
     
     /// <summary>
@@ -493,7 +480,6 @@ public class AdvancedUIController : MonoBehaviour
             }
         }
         
-        Debug.Log("AdvancedUIController: Controles do player desbloqueados!");
     }
     
     private void OnDestroy()

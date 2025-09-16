@@ -54,7 +54,6 @@ public class CameraBoundarySetup : MonoBehaviour
     {
         if (cameraController == null)
         {
-            Debug.LogWarning("CameraBoundarySetup: CameraFollowController não encontrado!");
             return;
         }
         
@@ -74,7 +73,6 @@ public class CameraBoundarySetup : MonoBehaviour
                 
             case BoundaryType.Disabled:
                 cameraController.DisableBoundaries();
-                Debug.Log("CameraBoundarySetup: Boundaries desabilitados");
                 break;
         }
     }
@@ -82,7 +80,6 @@ public class CameraBoundarySetup : MonoBehaviour
     private void SetupManualBoundaries()
     {
         cameraController.SetBoundaries(manualMinBounds, manualMaxBounds);
-        Debug.Log($"CameraBoundarySetup: Boundaries manuais definidos - Min: {manualMinBounds}, Max: {manualMaxBounds}");
     }
     
     private void SetupColliderBoundaries()
@@ -90,11 +87,9 @@ public class CameraBoundarySetup : MonoBehaviour
         if (boundaryCollider != null)
         {
             cameraController.SetBoundariesFromCollider(boundaryCollider);
-            Debug.Log("CameraBoundarySetup: Boundaries definidos a partir do collider");
         }
         else
         {
-            Debug.LogWarning("CameraBoundarySetup: BoxCollider2D não definido para boundaries por collider");
             SetupManualBoundaries(); // Fallback para manual
         }
     }
